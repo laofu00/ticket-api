@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>IT工单助手 - 系统监控</title>
+    <style>
+        /* 样式部分与之前完全相同，省略以节省篇幅，可沿用之前的完整样式 */
+        /* 注意：请确保样式中的 .card-unit 定义存在 */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; background: #f1f5f9; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .header { margin-bottom: 24px; }
+        h1 { font-size: 1.6rem; font-weight: 600; color: #0f172a; display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; background: #e2e8f0; padding: 4px 12px; border-radius: 40px; font-size: 0.85rem; font-weight: 500; color: #1e293b; }
+        .status-led { width: 10px; height: 10px; border-radius: 50%; background: #64748b; display: inline-block; }
+        .status-up .status-led { background: #10b981; box-shadow: 0 0 4px #10b981; }
+        .status-down .status-led { background: #ef4444; box-shadow: 0 0 4px #ef4444; }
+        .sub { color: #475569; margin-top: 8px; border-left: 3px solid #3b82f6; padding-left: 12px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px; margin-bottom: 24px; }
+        .card { background: white; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 1.2rem; border: 1px solid #e2e8f0; overflow-x: auto; }
+        .card-title { font-size: 0.85rem; text-transform: uppercase; font-weight: 600; color: #64748b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .card-value { font-size: 2rem; font-weight: 700; color: #0f172a; line-height: 1.2; }
+        .card-unit { font-size: 0.9rem; font-weight: 400; color: #475569; margin-left: 4px; }
+        .progress-bar-container { background: #e2e8f0; border-radius: 20px; height: 8px; margin-top: 12px; overflow: hidden; }
+        .progress-fill { background: #3b82f6; width: 0%; height: 100%; border-radius: 20px; transition: width 0.2s; }
+        hr { margin: 16px 0; border: none; border-top: 1px solid #eef2ff; }
+        .component-list { display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto; }
+        .component-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f2f5; padding-bottom: 6px; font-size: 0.85rem; }
+        .component-name { font-weight: 500; color: #1e293b; }
+        .component-status { font-size: 0.75rem; font-weight: 500; padding: 2px 8px; border-radius: 40px; background: #f1f5f9; }
+        .status-up-text { color: #10b981; }
+        .status-down-text { color: #ef4444; }
+        .status-unknown-text { color: #f59e0b; }
+        .row-stats { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .stat-item { background: #f8fafc; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; min-width: 100px; }
+        .footer { text-align: center; font-size: 0.7rem; color: #6c757d; margin-top: 32px; padding: 16px; border-top: 1px solid #e2e8f0; }
+        .refresh-btn { background: white; border: 1px solid #cbd5e1; border-radius: 30px; padding: 6px 16px; font-size: 0.75rem; font-weight: 500; cursor: pointer; margin-left: 16px; }
+        .refresh-btn:hover { background: #f8fafc; border-color: #94a3b8; }
+        @media (max-width: 760px) { body { padding: 12px; } .grid { gap: 12px; } .card-value { font-size: 1.6rem; } .row-stats { flex-direction: column; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>
+            📊 IT工单助手 · 系统监控
+            <span id="overallStatusBadge" class="status-badge"><span class="status-led"></span> 检测中...</span>
+            <button class="refresh-btn" onclick="refreshAll()">🔄 刷新</button>
+        </h1>
+        <div class="sub">实时展示健康状态、JVM 资源与关键指标 (基于 Actuator)</div>
+    </div>
+
+    <div class="grid">
+        <!-- 健康卡片 -->
+        <div class="card">
+            <div class="card-title">🩺 健康总览</div>
+            <div class="card-value" id="healthStatus">--</div>
+            <div class="component-list" id="componentsList">加载组件状态...</div>
+        </div>
+
+        <!-- JVM 内存卡片 -->
+        <div class="card">
+            <div class="card-title">🧠 JVM 内存</div>
+            <div>堆内存使用</div>
+            <div class="card-value" id="heapUsed">-- <span class="card-unit">MB</span></div>
+            <div class="progress-bar-container"><div class="progress-fill" id="heapProgress"></div></div>
+            <div class="row-stats">
+                <span class="stat-item">📦 最大: <strong id="heapMax">--</strong> <span class="card-unit">MB</span></span>
+                <span class="stat-item">💾 非堆: <strong id="nonHeapUsed">--</strong> <span class="card-unit">MB</span></span>
+            </div>
+        </div>
+
+        <!-- 系统负载卡片 -->
+        <div class="card">
+            <div class="card-title">⚙️ 系统负载 & 线程</div>
+            <div>CPU 使用率</div>
+            <div class="card-value" id="cpuUsage">-- <span class="card-unit">%</span></div>
+            <div class="progress-bar-container"><div class="progress-fill" id="cpuProgress"></div></div>
+            <div class="row-stats">
+                <span class="stat-item">🧵 活跃: <strong id="threadsLive">--</strong></span>
+                <span class="stat-item">📈 峰值: <strong id="threadsPeak">--</strong></span>
+                <span class="stat-item">🔁 守护: <strong id="threadsDaemon">--</strong></span>
+            </div>
+        </div>
+
+        <!-- GC 和运行时卡片 -->
+        <div class="card">
+            <div class="card-title">🗑️ 垃圾回收 & 运行时</div>
+            <div class="row-stats" style="justify-content: flex-start; gap: 16px;">
+                <span>🔢 GC 次数: <strong id="gcCount">--</strong></span>
+                <span>⏱️ 总耗时: <strong id="gcTime">--</strong> <span class="card-unit">ms</span></span>
+            </div>
+            <div class="row-stats" style="justify-content: flex-start; gap: 16px;">
+                <span>⏱️ 运行时长: <strong id="uptime">--</strong></span>
+                <span>📅 启动时间: <strong id="startTime">--</strong></span>
+            </div>
+            <hr>
+            <div style="font-size: 0.75rem; color: #475569;">✅ 端点: /manage/health & /manage/metrics</div>
+        </div>
+    </div>
+
+    <div class="footer">数据每 30 秒自动刷新 | Spring Boot Actuator | <span id="lastUpdate">--</span></div>
+</div>
+
+<script>
+    const formatBytesToMB = (bytes) => (bytes / 1048576).toFixed(2);
+    const formatDuration = (seconds) => {
+        if (seconds == null || isNaN(seconds)) return '--';
+        const days = Math.floor(seconds / 86400);
+        const hours = Math.floor((seconds % 86400) / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = Math.floor(seconds % 60);
+        if (days > 0) return `${days}d ${hours}h`;
+        if (hours > 0) return `${hours}h ${mins}m`;
+        if (mins > 0) return `${mins}m ${secs}s`;
+        return `${secs}s`;
+    };
+
+    async function fetchMetric(metricName) {
+        try {
+            const res = await fetch(`/manage/metrics/${metricName}`);
+            if (!res.ok) return null;
+            const data = await res.json();
+            if (data.measurements?.length) return data.measurements[0].value;
+            return null;
+        } catch { return null; }
+    }
+
+    async function fetchGcStats() {
+        try {
+            const res = await fetch('/manage/metrics/jvm.gc.pause');
+            if (!res.ok) return { count: null, totalTime: null };
+            const data = await res.json();
+            let count = 0, total = 0;
+            if (data.measurements) {
+                for (let m of data.measurements) {
+                    if (m.statistic === 'COUNT') count += m.value;
+                    if (m.statistic === 'TOTAL_TIME') total += m.value;
+                }
+            }
+            return { count: count || null, totalTime: total || null };
+        } catch { return { count: null, totalTime: null }; }
+    }
+
+    async function fetchHealth() {
+        try {
+            const res = await fetch('/manage/health');
+            return res.ok ? await res.json() : null;
+        } catch { return null; }
+    }
+
+    async function getStartTime() {
+        let start = await fetchMetric('process.start.time');
+        if (start && start > 0) {
+            if (start < 1e12) start *= 1000;
+            const date = new Date(start);
+            if (date.getFullYear() > 2000 && date.getFullYear() < 2100) return date;
+        }
+        const uptime = await fetchMetric('process.uptime');
+        if (uptime && uptime > 0) {
+            const now = new Date();
+            const estimated = new Date(now.getTime() - uptime * 1000);
+            if (estimated.getFullYear() > 2000) return estimated;
+        }
+        return null;
+    }
+
+    async function refreshAll() {
+        try {
+            // 健康
+            const health = await fetchHealth();
+            const statusSpan = document.getElementById('overallStatusBadge');
+            const healthDiv = document.getElementById('healthStatus');
+            const compContainer = document.getElementById('componentsList');
+            if (health?.status) {
+                const isUp = health.status === 'UP';
+                statusSpan.className = `status-badge ${isUp ? 'status-up' : 'status-down'}`;
+                statusSpan.innerHTML = `<span class="status-led"></span> ${health.status}`;
+                healthDiv.innerText = health.status;
+                if (health.components) {
+                    let html = '';
+                    for (const [name, detail] of Object.entries(health.components)) {
+                        const st = detail.status || 'UNKNOWN';
+                        const cls = st === 'UP' ? 'status-up-text' : (st === 'DOWN' ? 'status-down-text' : 'status-unknown-text');
+                        html += `<div class="component-item"><span class="component-name">${name}</span><span class="component-status ${cls}">${st}</span></div>`;
+                    }
+                    compContainer.innerHTML = html || '<div>无组件详情</div>';
+                } else {
+                    compContainer.innerHTML = '<div>健康详情未启用（设置 management.endpoint.health.show-details=always）</div>';
+                }
+            } else {
+                statusSpan.innerHTML = `<span class="status-led"></span> 未知`;
+                healthDiv.innerText = '无法获取';
+                compContainer.innerHTML = '<div>健康端点不可达</div>';
+            }
+
+            // 内存
+            const heapUsed = await fetchMetric('jvm.memory.used');
+            const heapMax = await fetchMetric('jvm.memory.max');
+            if (heapUsed !== null) {
+                const usedMB = formatBytesToMB(heapUsed);
+                document.getElementById('heapUsed').innerHTML = `${usedMB} <span class="card-unit">MB</span>`;
+                if (heapMax) {
+                    const maxMB = formatBytesToMB(heapMax);
+                    // 修复：只更新数值，不重复加单位
+                    document.getElementById('heapMax').innerText = maxMB;
+                    const percent = (heapUsed / heapMax) * 100;
+                    document.getElementById('heapProgress').style.width = `${Math.min(percent, 100)}%`;
+                }
+            }
+            let nonHeap = await fetchMetric('jvm.memory.nonheap.used');
+            if (!nonHeap) nonHeap = await fetchMetric('jvm.memory.used?tag=area:nonheap');
+            if (nonHeap) {
+                const nonHeapMB = formatBytesToMB(nonHeap);
+                // 修复：只更新数值
+                document.getElementById('nonHeapUsed').innerText = nonHeapMB;
+            }
+
+            // CPU
+            let cpu = await fetchMetric('process.cpu.usage');
+            if (cpu === null) cpu = await fetchMetric('system.cpu.usage');
+            if (cpu !== null) {
+                const percent = (cpu * 100).toFixed(1);
+                document.getElementById('cpuUsage').innerHTML = `${percent} <span class="card-unit">%</span>`;
+                document.getElementById('cpuProgress').style.width = `${Math.min(parseFloat(percent), 100)}%`;
+            }
+
+            // 线程
+            const threadsLive = await fetchMetric('jvm.threads.live');
+            const threadsPeak = await fetchMetric('jvm.threads.peak');
+            const threadsDaemon = await fetchMetric('jvm.threads.daemon');
+            if (threadsLive !== null) document.getElementById('threadsLive').innerText = threadsLive;
+            if (threadsPeak !== null) document.getElementById('threadsPeak').innerText = threadsPeak;
+            if (threadsDaemon !== null) document.getElementById('threadsDaemon').innerText = threadsDaemon;
+
+            // GC - 修复：限制小数位数且不重复单位
+            const gc = await fetchGcStats();
+            document.getElementById('gcCount').innerText = gc.count !== null ? gc.count : '未暴露';
+            if (gc.totalTime !== null) {
+                document.getElementById('gcTime').innerText = gc.totalTime.toFixed(2);
+            } else {
+                document.getElementById('gcTime').innerText = '未暴露';
+            }
+
+            // 运行时
+            const uptime = await fetchMetric('process.uptime');
+            if (uptime !== null) document.getElementById('uptime').innerText = formatDuration(uptime);
+            const startDate = await getStartTime();
+            document.getElementById('startTime').innerText = startDate ? startDate.toLocaleString('zh-CN') : '无法获取';
+
+            document.getElementById('lastUpdate').innerText = `最后更新: ${new Date().toLocaleTimeString()}`;
+        } catch (err) {
+            console.error('刷新失败', err);
+            document.getElementById('overallStatusBadge').innerHTML = `<span class="status-led"></span> 刷新异常`;
+        }
+    }
+
+    let autoTimer;
+    function startAutoRefresh() {
+        if (autoTimer) clearInterval(autoTimer);
+        refreshAll();
+        autoTimer = setInterval(refreshAll, 30000);
+    }
+    startAutoRefresh();
+</script>
+</body>
+</html>

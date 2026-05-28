@@ -1,0 +1,84 @@
+server:
+  port: 9090
+
+spring:
+
+  # MySQL 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/it_ticket?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+
+  # Redis 配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 123456
+      database: 0
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  # Jackson 日期格式配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+# MyBatis Plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.ticket.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# 日志配置
+logging:
+  level:
+    com.ticket: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/ticket-api.log
+    max-size: 10MB
+    max-history: 30
+
+# Dify 工单助手配置
+dify:
+  webapp-url: http://localhost/chat/ptkUTIuyodFBUixf
+
+# Actuator 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        # 生产环境推荐只暴露 health, info, metrics 这三个端点
+        include: health, info, metrics
+      # 可选：自定义 Actuator 端点的访问根路径，增加一层保护
+      base-path: /manage
+  endpoint:
+    health:
+      # 显示详细的健康检查信息 (如磁盘空间、数据库连接状态等)
+      show-details: always
+      # 可选：为健康检查结果设置缓存时间 (如 10秒)，避免检查过于频繁
+      cache:
+        time-to-live: 10s
+    # 明确禁用一些可能存在安全风险的高危端点
+    env:
+      enabled: false
+    beans:
+      enabled: false

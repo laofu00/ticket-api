@@ -1,0 +1,71 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ticket-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    networks:
+      - ticket-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: ticket-redis
+    restart: always
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - ./redis-data:/data
+    networks:
+      - ticket-net
+
+  api:
+    image: eclipse-temurin:21-jdk-alpine
+    container_name: ticket-api
+    restart: always
+    working_dir: /app
+    volumes:
+      - ./ticket-api.jar:/app/app.jar
+    command: java -Xms512m -Xmx512m -XX:+UseG1GC -XX:MaxMetaspaceSize=128m -XX:+DisableExplicitGC -Duser.timezone=Asia/Shanghai -jar app.jar
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      # Spring Boot 激活 test 环境
+      SPRING_PROFILES_ACTIVE: test
+
+      # 数据库连接（MySQL 容器内服务名 mysql）
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+
+      # Redis 连接
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+
+      # 供 application-test.yml 使用的变量
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DIFY_WEBAPP_URL: ${DIFY_WEBAPP_URL}
+    networks:
+      - ticket-net
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+networks:
+  ticket-net:
+    driver: bridge

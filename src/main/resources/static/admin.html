@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IT工单助手 - 管理后台</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        /* ========== Reset & Base ========== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ========== Layout ========== */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ========== Sidebar ========== */
+        .sidebar {
+            width: 220px;
+            background: #001529;
+            color: #fff;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+        .sidebar-logo {
+            padding: 20px 16px;
+            font-size: 18px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar-menu {
+            list-style: none;
+            padding: 8px 0;
+            flex: 1;
+        }
+        .sidebar-menu li {
+            padding: 12px 24px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.65);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        .sidebar-menu li:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.08);
+        }
+        .sidebar-menu li.active {
+            color: #fff;
+            background: #1890ff;
+        }
+        .sidebar-menu li .icon {
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* ========== Main Content ========== */
+        .main-content {
+            flex: 1;
+            padding: 24px;
+            min-width: 0;
+        }
+        .page-header {
+            margin-bottom: 24px;
+        }
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        /* ========== Stat Cards ========== */
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-card .label {
+            font-size: 14px;
+            color: #8c8c8c;
+            margin-bottom: 8px;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .stat-card .value.blue { color: #1890ff; }
+        .stat-card .value.green { color: #52c41a; }
+
+        /* ========== Search Bar ========== */
+        .search-bar {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+        .search-bar label {
+            font-size: 14px;
+            color: #555;
+            white-space: nowrap;
+        }
+        .search-bar input[type="date"] {
+            padding: 6px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-bar input[type="date"]:focus {
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+        }
+        .search-bar .btn {
+            padding: 6px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #1890ff;
+            color: #fff;
+        }
+        .btn-primary:hover { background: #40a9ff; }
+        .btn-primary:active { background: #096dd9; }
+        .btn-reset {
+            background: #fff;
+            color: #333;
+            border: 1px solid #d9d9d9 !important;
+        }
+        .btn-reset:hover { border-color: #1890ff !important; color: #1890ff; }
+        .btn-reset:active { border-color: #096dd9 !important; color: #096dd9; }
+
+        /* ========== Charts ========== */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .chart-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .chart-card .chart-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .chart-card .chart-subtitle {
+            font-size: 13px;
+            color: #8c8c8c;
+            margin-bottom: 12px;
+        }
+        .chart-container {
+            width: 100%;
+            height: 280px;
+        }
+
+        /* ========== View Sections ========== */
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* ========== Table ========== */
+        .table-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        table thead {
+            background: #fafafa;
+        }
+        table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #f0f0f0;
+            white-space: nowrap;
+        }
+        table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+        table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+        table tbody tr:hover {
+            background: #e6f7ff;
+        }
+        table td .ellipsis {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+        }
+
+        /* ========== Badges ========== */
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 22px;
+        }
+        .badge-red { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+        .badge-orange { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+        .badge-blue { background: #e6f7ff; color: #096dd9; border: 1px solid #91d5ff; }
+        .badge-gray { background: #f5f5f5; color: #8c8c8c; border: 1px solid #d9d9d9; }
+        .badge-green { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+
+        .btn-sm {
+            padding: 4px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            background: #fff;
+            color: #333;
+            transition: all 0.2s;
+        }
+        .btn-sm:hover { border-color: #1890ff; color: #1890ff; }
+
+        /* ========== Pagination ========== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            flex-wrap: wrap;
+        }
+        .pagination button {
+            padding: 6px 14px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .pagination button:hover:not(:disabled) { border-color: #1890ff; color: #1890ff; }
+        .pagination button.active { background: #1890ff; color: #fff; border-color: #1890ff; }
+        .pagination button:disabled { color: #d9d9d9; cursor: not-allowed; }
+        .pagination .info { font-size: 13px; color: #8c8c8c; }
+
+        /* ========== Modal ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            animation: modalFadeIn 0.2s ease;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .modal-header h3 { font-size: 16px; font-weight: 600; }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #8c8c8c;
+            padding: 4px;
+            line-height: 1;
+        }
+        .modal-close:hover { color: #333; }
+        .modal-body { padding: 24px; }
+        .modal-body .field-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .modal-body .field-grid .full-width {
+            grid-column: 1 / -1;
+        }
+        .modal-body .field {
+            margin-bottom: 0;
+        }
+        .modal-body .field label {
+            display: block;
+            font-size: 13px;
+            color: #8c8c8c;
+            margin-bottom: 4px;
+        }
+        .modal-body .field .value {
+            font-size: 14px;
+            color: #333;
+            word-break: break-all;
+        }
+        .modal-body .field select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+        .modal-body .field select:focus {
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .modal-footer .btn {
+            padding: 8px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modal-footer .btn-cancel {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .modal-footer .btn-cancel:hover { background: #e8e8e8; }
+        .modal-footer .btn-save {
+            background: #1890ff;
+            color: #fff;
+        }
+        .modal-footer .btn-save:hover { background: #40a9ff; }
+
+        /* ========== Empty / Error ========== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8c8c8c;
+        }
+        .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-state p { font-size: 14px; }
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: #8c8c8c;
+        }
+        .loading-spinner::after {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f0f0f0;
+            border-top-color: #1890ff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ========== Dify Chat Widget ========== */
+        .dify-fab {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #1677ff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(22,119,255,0.4);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            transition: all 0.25s ease;
+        }
+        .dify-fab:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(22,119,255,0.5);
+        }
+        .dify-fab.hidden { display: none; }
+
+        .dify-widget {
+            position: fixed;
+            left: calc(100vw - 452px);
+            top: calc(100vh - 716px);
+            width: 420px;
+            height: 620px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+            z-index: 2999;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: difySlideUp 0.25s ease;
+        }
+        .dify-widget.open { display: flex; }
+
+        @keyframes difySlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dify-widget-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #1677ff;
+            color: #fff;
+            flex-shrink: 0;
+            cursor: move;
+            user-select: none;
+        }
+        .dify-widget-header .title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .dify-widget-header .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+            opacity: 0.8;
+            transition: opacity 0.15s;
+        }
+        .dify-widget-header .close-btn:hover { opacity: 1; }
+
+        .dify-widget iframe {
+            flex: 1;
+            width: 100%;
+            border: none;
+        }
+
+        /* ========== Toast ========== */
+        .toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            padding: 12px 24px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+            z-index: 2000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast.success { background: #52c41a; }
+        .toast.error { background: #ff4d4f; }
+
+        /* ========== Responsive ========== */
+        @media (max-width: 900px) {
+            .charts-row { grid-template-columns: 1fr; }
+            .sidebar { width: 56px; }
+            .sidebar-logo { display: none; }
+            .sidebar-menu li span { display: none; }
+            .sidebar-menu li { justify-content: center; padding: 14px; }
+            .sidebar-menu li .icon { font-size: 20px; }
+        }
+        @media (max-width: 600px) {
+            .main-content { padding: 12px; }
+            .stat-cards { grid-template-columns: 1fr; }
+            .search-bar { flex-direction: column; align-items: stretch; }
+            .search-bar input[type="date"] { width: 100%; }
+            table th, table td { padding: 8px 10px; font-size: 12px; }
+            table td .ellipsis { max-width: 120px; }
+            .modal-body .field-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ========== Utility ========== */
+        .text-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">IT工单助手</div>
+        <ul class="sidebar-menu">
+            <li class="active" data-page="dashboard">
+                <span class="icon">&#x1F4CA;</span><span>统计面板</span>
+            </li>
+            <li data-page="tickets">
+                <span class="icon">&#x1F4CB;</span><span>工单列表</span>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1>IT工单助手 - 管理后台</h1>
+        </div>
+
+        <!-- Search -->
+        <div class="search-bar">
+            <label for="startDate">开始时间：</label>
+            <input type="date" id="startDate" />
+            <label for="endDate">结束时间：</label>
+            <input type="date" id="endDate" />
+            <button class="btn btn-primary" id="searchBtn">搜索</button>
+            <button class="btn btn-reset" id="resetBtn">重置</button>
+        </div>
+
+        <!-- Dashboard View -->
+        <div class="view-section active" id="viewDashboard">
+            <div class="stat-cards">
+                <div class="stat-card">
+                    <span class="label">总工单数</span>
+                    <span class="value blue" id="totalCount">--</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">今日新增工单</span>
+                    <span class="value green" id="todayCount">--</span>
+                </div>
+            </div>
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-title">工单按状态分布</div>
+                    <div class="chart-subtitle" id="statusChartSubtitle">共 0 单</div>
+                    <div class="chart-container" id="statusChart"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">工单按优先级分布</div>
+                    <div class="chart-subtitle" id="priorityChartSubtitle">共 0 单</div>
+                    <div class="chart-container" id="priorityChart"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tickets View -->
+        <div class="view-section" id="viewTickets">
+            <div class="table-card">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>工单号</th>
+                                <th>状态</th>
+                                <th>优先级</th>
+                                <th>描述</th>
+                                <th>提交人</th>
+                                <th>工位</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr><td colspan="9" class="empty-state"><p>加载中...</p></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="pagination"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>工单详情</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- filled by JS -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+            <button class="btn btn-save" onclick="saveTicket()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- Dify Chat Widget -->
+<button class="dify-fab" id="difyFab" title="Dify 工单助手" onclick="toggleDify()">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+</button>
+
+<div class="dify-widget" id="difyWidget">
+    <div class="dify-widget-header">
+        <span class="title">Dify 工单助手</span>
+        <button class="close-btn" onclick="toggleDify()">&times;</button>
+    </div>
+    <iframe id="difyIframe" title="Dify 工单助手" allow="microphone *; clipboard-write" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+    // ========== Constants ==========
+    const STATUS_MAP = { pending: '待处理', processing: '处理中', completed: '已完成', cancelled: '已取消' };
+    const PRIORITY_MAP = { high: '高', medium: '中', low: '低' };
+    const PRIORITY_BADGE = { high: 'badge-red', medium: 'badge-orange', low: 'badge-blue' };
+    const STATUS_BADGE = { pending: 'badge-orange', processing: 'badge-blue', completed: 'badge-green', cancelled: 'badge-gray' };
+
+    const PAGE_SIZE = 50;
+    let currentPage = 1;
+    let editingTicketId = null; // the modal editing ticket id (pk)
+
+    // ECharts instances
+    let statusChart = null;
+    let priorityChart = null;
+
+    // ========== Initialization ==========
+    document.addEventListener('DOMContentLoaded', function () {
+        // Set default date: end = today, start = 7 days ago
+        function getLocalDateStr(date) {
+            var y = date.getFullYear();
+            var m = String(date.getMonth() + 1).padStart(2, '0');
+            var d = String(date.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + d;
+        }
+        var today = new Date();
+        var sevenDaysAgo = new Date(today);
+        sevenDaysAgo.setDate(today.getDate() - 6);
+        document.getElementById('startDate').value = getLocalDateStr(sevenDaysAgo);
+        document.getElementById('endDate').value = getLocalDateStr(today);
+
+        statusChart = echarts.init(document.getElementById('statusChart'));
+        priorityChart = echarts.init(document.getElementById('priorityChart'));
+
+        // Handle resize
+        window.addEventListener('resize', function () {
+            statusChart && statusChart.resize();
+            priorityChart && priorityChart.resize();
+        });
+
+        // Search button
+        document.getElementById('searchBtn').addEventListener('click', function () {
+            currentPage = 1;
+            loadAll();
+        });
+
+        // Reset button — reset date range to last 7 days
+        document.getElementById('resetBtn').addEventListener('click', function () {
+            var now = new Date();
+            var weekAgo = new Date(now);
+            weekAgo.setDate(now.getDate() - 6);
+            document.getElementById('startDate').value = getLocalDateStr(weekAgo);
+            document.getElementById('endDate').value = getLocalDateStr(now);
+            currentPage = 1;
+            loadAll();
+        });
+
+        // Sidebar navigation — switch views
+        document.querySelectorAll('.sidebar-menu li').forEach(function (item) {
+            item.addEventListener('click', function () {
+                document.querySelectorAll('.sidebar-menu li').forEach(function (li) { li.classList.remove('active'); });
+                item.classList.add('active');
+                var page = item.getAttribute('data-page');
+                document.querySelectorAll('.view-section').forEach(function (v) { v.classList.remove('active'); });
+                var target = document.getElementById('view' + page.charAt(0).toUpperCase() + page.slice(1));
+                if (target) target.classList.add('active');
+                // Resize charts when switching back to dashboard
+                if (page === 'dashboard') {
+                    setTimeout(function () {
+                        statusChart && statusChart.resize();
+                        priorityChart && priorityChart.resize();
+                    }, 100);
+                }
+            });
+        });
+
+        // Initial load
+        loadAll();
+
+        // Fetch Dify webapp URL from backend config
+        fetch('/api/admin/config')
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.code === 200 && data.data && data.data.difyWebappUrl) {
+                    document.getElementById('difyIframe').src = data.data.difyWebappUrl;
+                }
+            })
+            .catch(function () { /* ignore, iframe just stays empty */ });
+    });
+
+    // ========== Data Loading ==========
+    function loadAll() {
+        loadDashboard();
+        loadTickets();
+    }
+
+    function getDateParams() {
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+        return { startDate: start, endDate: end };
+    }
+
+    // ========== Dashboard ==========
+    function loadDashboard() {
+        const { startDate, endDate } = getDateParams();
+        const params = new URLSearchParams();
+        if (startDate) params.set('startDate', startDate);
+        if (endDate) params.set('endDate', endDate);
+
+        fetch('/api/admin/dashboard?' + params.toString())
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.code !== 200) throw new Error(data.message || '请求失败');
+                const d = data.data;
+                // Stat cards
+                document.getElementById('totalCount').textContent = d.totalCount.toLocaleString();
+                document.getElementById('todayCount').textContent = d.todayCount.toLocaleString();
+                // Chart subtitles
+                document.getElementById('statusChartSubtitle').textContent = '共 ' + d.periodTotal + ' 单';
+                document.getElementById('priorityChartSubtitle').textContent = '共 ' + d.periodTotal + ' 单';
+                // Charts
+                renderStatusChart(d.statusDistribution);
+                renderPriorityChart(d.priorityDistribution);
+            })
+            .catch(function (err) {
+                console.error('Dashboard load error:', err);
+                showToast('仪表盘数据加载失败', 'error');
+            });
+    }
+
+    // ========== Charts ==========
+    function renderStatusChart(distribution) {
+        if (!statusChart) return;
+        const labels = Object.keys(distribution);
+        const values = Object.values(distribution);
+        const displayLabels = labels.map(function (k) { return STATUS_MAP[k] || k; });
+
+        var colors = {
+            pending: '#faad14',
+            processing: '#1890ff',
+            completed: '#52c41a',
+            cancelled: '#8c8c8c'
+        };
+
+        var option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: function (p) {
+                    return p.name + ': ' + p.value + ' 单 (' + p.percent + '%)';
+                }
+            },
+            legend: {
+                orient: 'vertical',
+                right: 10,
+                top: 'center',
+                textStyle: { fontSize: 12 }
+            },
+            series: [{
+                type: 'pie',
+                radius: ['35%', '60%'],
+                center: ['40%', '50%'],
+                avoidLabelOverlap: true,
+                itemStyle: {
+                    borderRadius: 4,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                },
+                label: {
+                    show: false
+                },
+                emphasis: {
+                    label: {
+                        show: true,
+                        fontSize: 14,
+                        fontWeight: 'bold'
+                    }
+                },
+                data: labels.map(function (k, i) {
+                    return {
+                        name: displayLabels[i],
+                        value: values[i],
+                        itemStyle: { color: colors[k] || '#d9d9d9' }
+                    };
+                }),
+                emptyText: '暂无数据',
+                graphic: values.length === 0 ? {
+                    type: 'text',
+                    left: 'center',
+                    top: 'center',
+                    style: { text: '暂无数据', fill: '#bfbfbf', fontSize: 14 }
+                } : undefined
+            }]
+        };
+        statusChart.setOption(option, true);
+    }
+
+    function renderPriorityChart(distribution) {
+        if (!priorityChart) return;
+        const labels = Object.keys(distribution);
+        const values = Object.values(distribution);
+        const displayLabels = labels.map(function (k) { return PRIORITY_MAP[k] || k; });
+
+        var colors = { high: '#ff4d4f', medium: '#fa8c16', low: '#1890ff' };
+
+        var option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: function (p) {
+                    return p.name + ': ' + p.value + ' 单 (' + p.percent + '%)';
+                }
+            },
+            legend: {
+                orient: 'vertical',
+                right: 10,
+                top: 'center',
+                textStyle: { fontSize: 12 }
+            },
+            series: [{
+                type: 'pie',
+                radius: ['35%', '60%'],
+                center: ['40%', '50%'],
+                avoidLabelOverlap: true,
+                itemStyle: {
+                    borderRadius: 4,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                },
+                label: { show: false },
+                emphasis: {
+                    label: {
+                        show: true,
+                        fontSize: 14,
+                        fontWeight: 'bold'
+                    }
+                },
+                data: labels.map(function (k, i) {
+                    return {
+                        name: displayLabels[i],
+                        value: values[i],
+                        itemStyle: { color: colors[k] || '#d9d9d9' }
+                    };
+                }),
+                emptyText: '暂无数据'
+            }]
+        };
+        priorityChart.setOption(option, true);
+    }
+
+    // ========== Tickets ==========
+    function loadTickets() {
+        const { startDate, endDate } = getDateParams();
+        const params = new URLSearchParams();
+        params.set('pageNum', currentPage);
+        params.set('pageSize', PAGE_SIZE);
+        if (startDate) params.set('createTimeStart', startDate + 'T00:00:00');
+        if (endDate) params.set('createTimeEnd', endDate + 'T23:59:59');
+
+        var tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '<tr><td colspan="9" class="loading-spinner"></td></tr>';
+
+        fetch('/api/tickets?' + params.toString())
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.code !== 200) throw new Error(data.message || '请求失败');
+                renderTable(data.data);
+            })
+            .catch(function (err) {
+                console.error('Tickets load error:', err);
+                tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">&#x26A0;</div><p>数据加载失败</p></div></td></tr>';
+            });
+    }
+
+    function renderTable(pageResult) {
+        var tbody = document.getElementById('tableBody');
+        var records = pageResult.records || [];
+
+        if (records.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">&#x1F4ED;</div><p>暂无工单数据</p></div></td></tr>';
+            document.getElementById('pagination').innerHTML = '';
+            return;
+        }
+
+        var html = '';
+        records.forEach(function (t) {
+            var statusText = STATUS_MAP[t.status] || t.status;
+            var priorityText = PRIORITY_MAP[t.priority] || t.priority;
+            var statusBadge = STATUS_BADGE[t.status] || 'badge-gray';
+            var priorityBadge = PRIORITY_BADGE[t.priority] || 'badge-gray';
+            var desc = t.faultDescription || '-';
+            var createTime = t.createTime || '';
+            if (createTime.length > 16) createTime = createTime.substring(0, 16);
+
+            html += '<tr>' +
+                '<td>' + t.id + '</td>' +
+                '<td><span class="text-ellipsis" style="display:inline-block;max-width:160px" title="' + escapeHtml(t.ticketId) + '">' + escapeHtml(t.ticketId) + '</span></td>' +
+                '<td><span class="badge ' + statusBadge + '">' + statusText + '</span></td>' +
+                '<td><span class="badge ' + priorityBadge + '">' + priorityText + '</span></td>' +
+                '<td style="max-width:200px;overflow:hidden"><span class="ellipsis" title="' + escapeHtml(desc) + '">' + escapeHtml(desc) + '</span></td>' +
+                '<td>' + escapeHtml(t.reporter || '-') + '</td>' +
+                '<td style="max-width:200px;overflow:hidden"><span class="ellipsis" title="' + escapeHtml(t.location || '') + '">' + escapeHtml(t.location || '-') + '</span></td>' +
+                '<td style="white-space:nowrap">' + createTime + '</td>' +
+                '<td><button class="btn-sm" onclick="openDetail(' + t.id + ')">详情</button></td>' +
+                '</tr>';
+        });
+        tbody.innerHTML = html;
+
+        renderPagination(pageResult.total, pageResult.pageNum, pageResult.pageSize);
+    }
+
+    function renderPagination(total, pageNum, pageSize) {
+        var container = document.getElementById('pagination');
+        var totalPages = Math.max(1, Math.ceil(total / pageSize));
+        pageNum = parseInt(pageNum);
+        if (totalPages <= 1) {
+            container.innerHTML = '<span class="info">共 ' + total + ' 条</span>';
+            return;
+        }
+
+        var html = '<span class="info">共 ' + total + ' 条，第 ' + pageNum + '/' + totalPages + ' 页</span>';
+        html += '<button ' + (pageNum <= 1 ? 'disabled' : '') + ' onclick="goPage(1)">首页</button>';
+        html += '<button ' + (pageNum <= 1 ? 'disabled' : '') + ' onclick="goPage(' + (pageNum - 1) + ')">上一页</button>';
+
+        // Show nearby pages
+        var start = Math.max(1, pageNum - 2);
+        var end = Math.min(totalPages, pageNum + 2);
+        if (start > 1) { html += '<button onclick="goPage(1)">1</button>'; if (start > 2) html += '<button disabled>...</button>'; }
+        for (var i = start; i <= end; i++) {
+            html += '<button class="' + (i === pageNum ? 'active' : '') + '" onclick="goPage(' + i + ')">' + i + '</button>';
+        }
+        if (end < totalPages) { if (end < totalPages - 1) html += '<button disabled>...</button>'; html += '<button onclick="goPage(' + totalPages + ')">' + totalPages + '</button>'; }
+
+        html += '<button ' + (pageNum >= totalPages ? 'disabled' : '') + ' onclick="goPage(' + (pageNum + 1) + ')">下一页</button>';
+        html += '<button ' + (pageNum >= totalPages ? 'disabled' : '') + ' onclick="goPage(' + totalPages + ')">末页</button>';
+
+        container.innerHTML = html;
+    }
+
+    function goPage(page) {
+        currentPage = page;
+        loadTickets();
+        // Scroll to table
+        document.querySelector('.table-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ========== Detail Modal ==========
+    function openDetail(id) {
+        editingTicketId = id;
+        fetch('/api/tickets/' + id)
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.code !== 200) throw new Error(data.message || '请求失败');
+                var t = data.data;
+                var statusText = STATUS_MAP[t.status] || t.status;
+                var priorityText = PRIORITY_MAP[t.priority] || t.priority;
+
+                var statusOptions = ['pending', 'processing', 'completed', 'cancelled'].map(function (s) {
+                    return '<option value="' + s + '" ' + (s === t.status ? 'selected' : '') + '>' + (STATUS_MAP[s] || s) + '</option>';
+                }).join('');
+                var priorityOptions = ['high', 'medium', 'low'].map(function (p) {
+                    return '<option value="' + p + '" ' + (p === t.priority ? 'selected' : '') + '>' + (PRIORITY_MAP[p] || p) + '</option>';
+                }).join('');
+
+                var html =
+                    '<div class="field-grid">' +
+                    '<div class="field full-width"><label>工单号</label><div class="value">' + escapeHtml(t.ticketId) + '</div></div>' +
+                    '<div class="field"><label>提交人</label><div class="value">' + escapeHtml(t.reporter || '-') + '</div></div>' +
+                    '<div class="field"><label>工位位置</label><div class="value">' + escapeHtml(t.location || '-') + '</div></div>' +
+                    '<div class="field"><label>创建时间</label><div class="value">' + (t.createTime || '-') + '</div></div>' +
+                    '<div class="field"><label>更新时间</label><div class="value">' + (t.updateTime || '-') + '</div></div>' +
+                    '<div class="field"><label>当前状态</label><div class="value">' + statusText + '</div></div>' +
+                    '<div class="field"><label>当前优先级</label><div class="value">' + priorityText + '</div></div>' +
+                    '<div class="field"><label>修改状态</label><select id="editStatus">' + statusOptions + '</select></div>' +
+                    '<div class="field"><label>修改优先级</label><select id="editPriority">' + priorityOptions + '</select></div>' +
+                    '<div class="field full-width"><label>工单描述</label><div class="value">' + escapeHtml(t.faultDescription || '-') + '</div></div>' +
+                    '</div>';
+
+                document.getElementById('modalBody').innerHTML = html;
+                document.getElementById('detailModal').classList.add('active');
+            })
+            .catch(function (err) {
+                console.error('Detail load error:', err);
+                showToast('加载工单详情失败', 'error');
+            });
+    }
+
+    function closeModal() {
+        document.getElementById('detailModal').classList.remove('active');
+        editingTicketId = null;
+    }
+
+    function saveTicket() {
+        if (!editingTicketId) return;
+
+        var status = document.getElementById('editStatus').value;
+        var priority = document.getElementById('editPriority').value;
+        var body = {};
+        if (status) body.status = status;
+        if (priority) body.priority = priority;
+
+        fetch('/api/admin/tickets/' + editingTicketId, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            if (data.code !== 200) throw new Error(data.message || '保存失败');
+            showToast('保存成功', 'success');
+            closeModal();
+            loadTickets();
+            loadDashboard();
+        })
+        .catch(function (err) {
+            console.error('Save error:', err);
+            showToast(err.message || '保存失败', 'error');
+        });
+    }
+
+    // ========== Utility ==========
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function showToast(msg, type) {
+        var el = document.getElementById('toast');
+        el.textContent = msg;
+        el.className = 'toast ' + (type || 'success') + ' show';
+        clearTimeout(el._timer);
+        el._timer = setTimeout(function () { el.classList.remove('show'); }, 3000);
+    }
+
+    // Close modal when clicking overlay background
+    document.getElementById('detailModal').addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+    });
+
+    // ========== Dify Chat Drag & Toggle ==========
+    var difyDragging = false;
+    var difyDragStartX, difyDragStartY, difyOrigLeft, difyOrigTop;
+
+    function toggleDify() {
+        var fab = document.getElementById('difyFab');
+        var widget = document.getElementById('difyWidget');
+        var isOpen = widget.classList.contains('open');
+        if (isOpen) {
+            widget.classList.remove('open');
+            fab.classList.remove('hidden');
+        } else {
+            widget.classList.add('open');
+            fab.classList.add('hidden');
+        }
+    }
+
+    function initDifyDrag() {
+        var header = document.querySelector('.dify-widget-header');
+        var widget = document.getElementById('difyWidget');
+
+        header.addEventListener('mousedown', function (e) {
+            if (e.target.closest('.close-btn')) return;
+            difyDragging = true;
+            difyDragStartX = e.clientX;
+            difyDragStartY = e.clientY;
+            difyOrigLeft = parseInt(widget.style.left) || widget.offsetLeft;
+            difyOrigTop = parseInt(widget.style.top) || widget.offsetTop;
+            widget.style.transition = 'none';
+            widget.style.animation = 'none';
+        });
+    }
+
+    document.addEventListener('mousemove', function (e) {
+        if (!difyDragging) return;
+        var widget = document.getElementById('difyWidget');
+        var dx = e.clientX - difyDragStartX;
+        var dy = e.clientY - difyDragStartY;
+        widget.style.left = (difyOrigLeft + dx) + 'px';
+        widget.style.top = (difyOrigTop + dy) + 'px';
+    });
+
+    document.addEventListener('mouseup', function () {
+        if (!difyDragging) return;
+        difyDragging = false;
+        var widget = document.getElementById('difyWidget');
+        widget.style.transition = '';
+    });
+
+    // Init drag after DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDifyDrag);
+    } else {
+        initDifyDrag();
+    }
+</script>
+</body>
+</html>
