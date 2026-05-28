@@ -1,0 +1,2397 @@
+app:
+  description: 企业工单助手对话流，可咨询IT服务相关信息，创建工单、查询工单等
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  icon_type: emoji
+  mode: advanced-chat
+  name: it_ticket_assistant
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/deepseek:0.0.15@725407927b04e236212083d20e92830d60fa944e42cd357ef6902c160414f6f1
+    version: null
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/tongyi:0.1.45@7f2b2d5b163de4c1ad8fad80e624c08d47ed7942a6a534e88e5786e65073f3ca
+    version: null
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables:
+  - description: 用户确认创建工单开始时间
+    id: 1db03409-55a4-43c2-af76-ee5359f71fe6
+    name: state_start_time
+    selector:
+    - conversation
+    - state_start_time
+    value: ''
+    value_type: string
+  - description: 待处理内容。存储“知识库未命中时记录的用户故障描述”，示例值："我的电脑无法开机"
+    id: a00d1995-6aef-4efd-979e-bf2c008b280a
+    name: pending_fault
+    selector:
+    - conversation
+    - pending_fault
+    value: ''
+    value_type: string
+  - description: 状态机主变量。存储当前对话阶段，示例值："idle", "waiting_confirm", "waiting_location"
+    id: 3692b6c2-544c-455e-8efb-11e2786bb51b
+    name: state
+    selector:
+    - conversation
+    - state
+    value: idle
+    value_type: string
+  environment_variables:
+  - description: ''
+    id: 5afd58e0-de5c-46c9-b72a-1dcdd632f70e
+    name: TICKET_API_BASE_URL
+    selector:
+    - env
+    - TICKET_API_BASE_URL
+    value: http://172.17.0.1:8080
+    value_type: string
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: 你好，我是工单助手，可以查询IT服务相关问题，创建工单、查询工单，有任何相关问题尽管提问
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: 1779335192275-source-1779518130701-target
+      selected: false
+      source: '1779335192275'
+      sourceHandle: source
+      target: '1779518130701'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1779518130701-source-1779519078111-target
+      selected: false
+      source: '1779518130701'
+      sourceHandle: source
+      target: '1779519078111'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1779519078111-true-1779519384261-target
+      selected: false
+      source: '1779519078111'
+      sourceHandle: 'true'
+      target: '1779519384261'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1779519078111-c95d9b62-84c0-45bf-bb71-7e01cc9dd640-1779519393653-target
+      selected: false
+      source: '1779519078111'
+      sourceHandle: c95d9b62-84c0-45bf-bb71-7e01cc9dd640
+      target: '1779519393653'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1779519250363--1779519505807-target
+      selected: false
+      source: '1779519250363'
+      sourceHandle: source
+      target: '1779519505807'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: if-else
+      id: 1779526786763--1779527042441-target
+      selected: false
+      source: '1779526786763'
+      sourceHandle: source
+      target: '1779527042441'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1779527042441-false-1779527259565-target
+      selected: false
+      source: '1779527042441'
+      sourceHandle: 'false'
+      target: '1779527259565'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: 1779527042441-true-1779528053164-target
+      selected: false
+      source: '1779527042441'
+      sourceHandle: 'true'
+      target: '1779528053164'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1779528053164--1779528120662-target
+      selected: false
+      source: '1779528053164'
+      sourceHandle: source
+      target: '1779528120662'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1779528120662-false-1779528216583-target
+      selected: false
+      source: '1779528120662'
+      sourceHandle: 'false'
+      target: '1779528216583'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: answer
+      id: 1779528247384-fail-branch-1779528484061-target
+      selected: false
+      source: '1779528247384'
+      sourceHandle: fail-branch
+      target: '1779528484061'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 1779528247384--1779528826995-target
+      selected: false
+      source: '1779528247384'
+      sourceHandle: source
+      target: '1779528826995'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1779528826995--1779529010207-target
+      selected: false
+      source: '1779528826995'
+      sourceHandle: source
+      target: '1779529010207'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1779529010207-true-1779529037415-target
+      selected: false
+      source: '1779529010207'
+      sourceHandle: 'true'
+      target: '1779529037415'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1779529010207-false-1779529189938-target
+      selected: false
+      source: '1779529010207'
+      sourceHandle: 'false'
+      target: '1779529189938'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: knowledge-retrieval
+      id: 1779532175421-source-1779529348142-target
+      selected: false
+      source: '1779532175421'
+      sourceHandle: source
+      target: '1779529348142'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: knowledge-retrieval
+        targetType: if-else
+      id: 1779529348142-source-1779529489464-target
+      selected: false
+      source: '1779529348142'
+      sourceHandle: source
+      target: '1779529489464'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1779529489464-true-1779532488891-target
+      selected: false
+      source: '1779529489464'
+      sourceHandle: 'true'
+      target: '1779532488891'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1779529489464-false-1779539333753-target
+      selected: false
+      source: '1779529489464'
+      sourceHandle: 'false'
+      target: '1779539333753'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: if-else
+      id: 1779539333753--1779539459467-target
+      selected: false
+      source: '1779539333753'
+      sourceHandle: source
+      target: '1779539459467'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1779539459467-false-1779539693536-target
+      selected: false
+      source: '1779539459467'
+      sourceHandle: 'false'
+      target: '1779539693536'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: if-else
+      id: 1779519384261--1779540854311-target
+      selected: false
+      source: '1779519384261'
+      sourceHandle: source
+      target: '1779540854311'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: assigner
+      id: 1779541050282--1779541119131-target
+      selected: false
+      source: '1779541050282'
+      sourceHandle: source
+      target: '1779541119131'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: 1779541119131--1779541180245-target
+      selected: false
+      source: '1779541119131'
+      sourceHandle: source
+      target: '1779541180245'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: assigner
+      id: 1779540854311-1018cbd4-e9d3-4631-aa22-4804b72aa81f-1779541228838-target
+      selected: false
+      source: '1779540854311'
+      sourceHandle: 1018cbd4-e9d3-4631-aa22-4804b72aa81f
+      target: '1779541228838'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: 1779541228838--1779541253822-target
+      selected: false
+      source: '1779541228838'
+      sourceHandle: source
+      target: '1779541253822'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 1779519393653--1779541542812-target
+      selected: false
+      source: '1779519393653'
+      sourceHandle: source
+      target: '1779541542812'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1779541542812--1779541623605-target
+      selected: false
+      source: '1779541542812'
+      sourceHandle: source
+      target: '1779541623605'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 1779541816017--1779542011461-target
+      selected: false
+      source: '1779541816017'
+      sourceHandle: source
+      target: '1779542011461'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: answer
+      id: 1779541816017-fail-branch-1779542132056-target
+      selected: false
+      source: '1779541816017'
+      sourceHandle: fail-branch
+      target: '1779542132056'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1779542011461--1779542221617-target
+      selected: false
+      source: '1779542011461'
+      sourceHandle: source
+      target: '1779542221617'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1779542221617-false-1779542459094-target
+      selected: false
+      source: '1779542221617'
+      sourceHandle: 'false'
+      target: '1779542459094'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1779527042441-a011bf54-265e-49d4-8256-9c17598445a1-1779532175421-target
+      selected: false
+      source: '1779527042441'
+      sourceHandle: a011bf54-265e-49d4-8256-9c17598445a1
+      target: '1779532175421'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: http-request
+      id: 1779528120662-true-1779528247384-target
+      selected: false
+      source: '1779528120662'
+      sourceHandle: 'true'
+      target: '1779528247384'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: 1779539572974-source-1779540021910-target
+      selected: false
+      source: '1779539572974'
+      sourceHandle: source
+      target: '1779540021910'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: 17795939313650-source-1779539261519-target
+      selected: false
+      source: '17795939313650'
+      sourceHandle: source
+      target: '1779539261519'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: 1779540854311-true-1779541050282-target
+      selected: false
+      source: '1779540854311'
+      sourceHandle: 'true'
+      target: '1779541050282'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1779519505807-true-answer-target
+      selected: false
+      source: '1779519505807'
+      sourceHandle: 'true'
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1779519505807-false-1779526786763-target
+      selected: false
+      source: '1779519505807'
+      sourceHandle: 'false'
+      target: '1779526786763'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: assigner
+      id: 1779541623605-false-1779613464908-target
+      selected: false
+      source: '1779541623605'
+      sourceHandle: 'false'
+      target: '1779613464908'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: assigner
+      id: 1779540854311-false-1779613464908-target
+      selected: false
+      source: '1779540854311'
+      sourceHandle: 'false'
+      target: '1779613464908'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: assigner
+      id: 1779519078111-false-1779613464908-target
+      selected: false
+      source: '1779519078111'
+      sourceHandle: 'false'
+      target: '1779613464908'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: code
+      id: 1779613464908-source-1779519250363-target
+      selected: false
+      source: '1779613464908'
+      sourceHandle: source
+      target: '1779519250363'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 1779532488891-source-17796148399810-target
+      selected: false
+      source: '1779532488891'
+      sourceHandle: source
+      target: '17796148399810'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: assigner
+      id: 17796148399810-source-17795939313650-target
+      selected: false
+      source: '17796148399810'
+      sourceHandle: source
+      target: '17795939313650'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: 1779539459467-true-17796148953420-target
+      selected: false
+      source: '1779539459467'
+      sourceHandle: 'true'
+      target: '17796148953420'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: assigner
+      id: 17796148953420-source-1779539572974-target
+      selected: false
+      source: '17796148953420'
+      sourceHandle: source
+      target: '1779539572974'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1779542221617-true-1779542323363-target
+      selected: false
+      source: '1779542221617'
+      sourceHandle: 'true'
+      target: '1779542323363'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: assigner
+      id: 1779541623605-true-1779542298931-target
+      source: '1779541623605'
+      sourceHandle: 'true'
+      target: '1779542298931'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: http-request
+      id: 1779542298931-source-1779541816017-target
+      source: '1779542298931'
+      sourceHandle: source
+      target: '1779541816017'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: assigner
+      id: 1779541623605-6233904c-82b5-4e5e-af62-0ebefba04d1f-1779541228838-target
+      source: '1779541623605'
+      sourceHandle: 6233904c-82b5-4e5e-af62-0ebefba04d1f
+      target: '1779541228838'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 用户输入
+        type: start
+        variables: []
+      height: 72
+      id: '1779335192275'
+      position:
+        x: -1203.4757980135255
+        y: 25.22330337977678
+      positionAbsolute:
+        x: -1203.4757980135255
+        y: 25.22330337977678
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#1779519250363.message#}}'
+        selected: false
+        title: 拦截不支持操作响应
+        type: answer
+        variables: []
+      height: 102
+      id: answer
+      position:
+        x: 2060.4980475806315
+        y: 444.41690809473675
+      positionAbsolute:
+        x: 2060.4980475806315
+        y: 444.41690809473675
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "from datetime import datetime, timedelta, timezone\n\ndef main(state:\
+          \ str, state_start_time: str):\n    current_state = state or 'idle'\n  \
+          \  start_time_str = state_start_time or ''\n    \n    effective_state =\
+          \ current_state\n    \n    # 超时逻辑：如果状态不为idle且超过15分钟，则自动重置\n    if current_state\
+          \ != 'idle' and start_time_str:\n        try:\n            start_time =\
+          \ datetime.fromisoformat(start_time_str).replace(tzinfo=timezone.utc)\n\
+          \            if datetime.now(timezone.utc) - start_time > timedelta(minutes=15):\n\
+          \                effective_state = 'idle'\n        except Exception:\n \
+          \           pass\n    \n    return {\n        \"effective_state\": effective_state\n\
+          \    }"
+        code_language: python3
+        outputs:
+          effective_state:
+            children: null
+            type: string
+        selected: false
+        title: 判断当前状态机
+        type: code
+        variables:
+        - value_selector:
+          - conversation
+          - state
+          value_type: string
+          variable: state
+        - value_selector:
+          - conversation
+          - state_start_time
+          value_type: string
+          variable: state_start_time
+      height: 51
+      id: '1779518130701'
+      position:
+        x: -830.456849199459
+        y: 46.22330337977678
+      positionAbsolute:
+        x: -830.456849199459
+        y: 46.22330337977678
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: d7e59bcb-522f-4d8f-b6aa-84fa191d1b77
+            value: waiting_confirm
+            varType: string
+            variable_selector:
+            - '1779518130701'
+            - effective_state
+          id: 'true'
+          logical_operator: and
+        - case_id: c95d9b62-84c0-45bf-bb71-7e01cc9dd640
+          conditions:
+          - comparison_operator: contains
+            id: 2e6f5874-15e5-4936-85f0-e2782fcfee3c
+            value: waiting_location
+            varType: string
+            variable_selector:
+            - '1779518130701'
+            - effective_state
+          id: c95d9b62-84c0-45bf-bb71-7e01cc9dd640
+          logical_operator: and
+        selected: false
+        title: 根据状态机走不同分支
+        type: if-else
+      height: 219
+      id: '1779519078111'
+      position:
+        x: -393.3766866237163
+        y: 46.22330337977678
+      positionAbsolute:
+        x: -393.3766866237163
+        y: 46.22330337977678
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "def main(user_input: str):\n    unsupported_keywords = ['删除', '修改',\
+          \ '更新', '关闭', '取消', '撤回', '编辑', '变更', '撤销']\n    for kw in unsupported_keywords:\n\
+          \        if kw in user_input:\n            return {\n                \"\
+          blocked\": True,\n                \"message\": f\"抱歉，暂不支持“{kw}”操作。如需帮助，请联系人工客服（内线1234）。\"\
+          \n            }\n    return {\"blocked\": False, \"message\": \"\"}"
+        code_language: python3
+        outputs:
+          blocked:
+            children: null
+            type: boolean
+          message:
+            children: null
+            type: string
+        selected: false
+        title: 拦截不支持的操作
+        type: code
+        variables:
+        - value_selector:
+          - sys
+          - query
+          value_type: string
+          variable: user_input
+      height: 51
+      id: '1779519250363'
+      position:
+        x: 1345.3366664640362
+        y: 542.7188261341939
+      positionAbsolute:
+        x: 1345.3366664640362
+        y: 542.7188261341939
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params:
+            temperature: 0.5
+            thinking: false
+          mode: chat
+          name: deepseek-v4-pro
+          provider: langgenius/deepseek/deepseek
+        prompt_template:
+        - id: 1e6fdde7-fae5-476d-a992-25c6eb542650
+          role: system
+          text: '判断用户输入属于以下哪一类，只输出一个单词：
+
+            - affirmative：用户同意创建工单，包含“是”、“可以”、“创建”、“好的”、“报修”、“帮我提”、“提交工单”、“创建工单”、“需要”、“麻烦处理”
+
+            - negative：用户拒绝创建工单，包含“否”、“不用”、“算了”、“取消”、“不需要”、“已解决”、“暂不需要”、“好了”、“解决了”
+
+            - other：跟以上无关内容
+
+            只能输出其中任意一个单词：affirmative、negative、other'
+        - id: b5fbdc8e-7734-40ac-ae4f-88af712ac856
+          role: user
+          text: '{{#sys.query#}}'
+        selected: false
+        title: 识别用户创建工单意图
+        type: llm
+        vision:
+          enabled: false
+      height: 87
+      id: '1779519384261'
+      position:
+        x: 85.40373035487278
+        y: -406.5001868640268
+      positionAbsolute:
+        x: 85.40373035487278
+        y: -406.5001868640268
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params:
+            temperature: 0.5
+            thinking: false
+          mode: chat
+          name: deepseek-v4-pro
+          provider: langgenius/deepseek/deepseek
+        prompt_template:
+        - id: e2db5838-d515-443b-b07b-9494b4b11314
+          role: system
+          text: '你是一个信息提取专家。从用户输入中提取位置信息：
+
+            - location：工位位置或编号，例如“A-12”、“门口左边第二排”、“第三排第二个B04”。如果用户没有提到任何位置信息，输出 null。
+
+            - negative：用户放弃提供位置，包含“不用”、“算了”、“取消”、“不需要”、“已解决”、“暂不需要”、“好了”、“解决了”，输出
+            no，否则输出 null
+
+
+            严格要求以json的格式输出,例如：{"location":"第三排第二个B04", ,negative: null},{"location":null,
+            ,negative: ''no''},{"location":null, ,negative: null}'
+        - id: 7643f832-d1c0-4fb6-a08d-814ae98f6244
+          role: user
+          text: '{{#sys.query#}}'
+        selected: false
+        title: 提取位置信息
+        type: llm
+        vision:
+          enabled: false
+      height: 87
+      id: '1779519393653'
+      position:
+        x: 69.40373035487278
+        y: 46.22330337977678
+      positionAbsolute:
+        x: 69.40373035487278
+        y: 46.22330337977678
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: 337977f4-4697-46fc-bc5f-01f8add8756d
+            value: true
+            varType: boolean
+            variable_selector:
+            - '1779519250363'
+            - blocked
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: 是否为拦截操作分支
+        type: if-else
+      height: 123
+      id: '1779519505807'
+      position:
+        x: 1654.4880556541593
+        y: 542.7188261341939
+      positionAbsolute:
+        x: 1654.4880556541593
+        y: 542.7188261341939
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params:
+            temperature: 0
+            thinking: false
+          mode: chat
+          name: deepseek-v4-pro
+          provider: langgenius/deepseek/deepseek
+        prompt_template:
+        - id: 8bcc499d-75c5-4ec7-ab58-2175444a033a
+          role: system
+          text: '你是一个意图识别专家。你的任务是根据用户输入，判断意图并严格输出以下三类单词之一：query_ticket、greeting、need_help。
+
+            - query_ticket：用户明确询问工单状态，包含“查工单”、“工单状态”、“我的工单”、“工单号”等。
+
+            - greeting：用户问候或闲聊，如“你好”、“在吗”、“谢谢”、“今天天气”等与 IT 服务无关的内容。
+
+            - need_help：其他所有需要 IT 帮助的问题，包括报修、故障、咨询操作步骤、寻求解决方案、奖励机制等。
+
+
+            绝对不要输出任何解释、标点符号、空格或其他多余字符。只输出一个单词。'
+        - id: 502ba64e-1044-4e92-9cf2-f0b5fc31d5b7
+          role: user
+          text: '{{#sys.query#}}'
+        selected: false
+        structured_output_enabled: false
+        title: 意图识别
+        type: llm
+        vision:
+          enabled: false
+      height: 87
+      id: '1779526786763'
+      position:
+        x: 2055.944285151421
+        y: 662.1803460378413
+      positionAbsolute:
+        x: 2055.944285151421
+        y: 662.1803460378413
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: 97f15b72-6f97-4405-a5f7-67151dd744b0
+            value: query_ticket
+            varType: string
+            variable_selector:
+            - '1779526786763'
+            - text
+          id: 'true'
+          logical_operator: and
+        - case_id: a011bf54-265e-49d4-8256-9c17598445a1
+          conditions:
+          - comparison_operator: is
+            id: 7e2d884a-4173-4426-911b-c2e8fcb64863
+            value: need_help
+            varType: string
+            variable_selector:
+            - '1779526786763'
+            - text
+          id: a011bf54-265e-49d4-8256-9c17598445a1
+          logical_operator: and
+        selected: false
+        title: 意图识别分支
+        type: if-else
+      height: 195
+      id: '1779527042441'
+      position:
+        x: 2373.0260621213793
+        y: 662.1803460378413
+      positionAbsolute:
+        x: 2373.0260621213793
+        y: 662.1803460378413
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: "您好，我是 IT 服务助手，可以帮您：\n  - 创建 IT 工单（报修、软件申请等）\n  - 查询工单状态\n  - 解答常见\
+          \ IT 问题（密码、网络、硬件等）\n  请直接描述您的问题。"
+        selected: false
+        title: 响应用户通用回答
+        type: answer
+        variables: []
+      height: 163
+      id: '1779527259565'
+      position:
+        x: 2805.172874625354
+        y: 999.9759841427366
+      positionAbsolute:
+        x: 2805.172874625354
+        y: 999.9759841427366
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "import re\ndef main(USER_INPUT: str):\n  match = re.search(r'(IT[-_]\\\
+          d{8}-\\d{3,5})|(IT[-_]\\d{4,})', USER_INPUT, re.IGNORECASE)\n  ticketId\
+          \ = match.group(0) if match else None\n  return {\"ticketId\": ticketId}"
+        code_language: python3
+        outputs:
+          ticketId:
+            children: null
+            type: string
+        selected: false
+        title: 提取工单号
+        type: code
+        variables:
+        - value_selector:
+          - sys
+          - query
+          value_type: string
+          variable: USER_INPUT
+      height: 51
+      id: '1779528053164'
+      position:
+        x: 2810.450906268445
+        y: 518.1664936748174
+      positionAbsolute:
+        x: 2810.450906268445
+        y: 518.1664936748174
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: not empty
+            id: f9e8a69c-a84a-434c-88e3-d7c37838cf90
+            value: ''
+            varType: string
+            variable_selector:
+            - '1779528053164'
+            - ticketId
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: 提取工单号结果判断
+        type: if-else
+      height: 123
+      id: '1779528120662'
+      position:
+        x: 3166.8118904468993
+        y: 518.1664936748174
+      positionAbsolute:
+        x: 3166.8118904468993
+        y: 518.1664936748174
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: 请输入完整工单号进行查询，例如：IT-20260510-001
+        selected: false
+        title: 提取工单号失败响应
+        type: answer
+        variables: []
+      height: 115
+      id: '1779528216583'
+      position:
+        x: 3549.3753363012665
+        y: 586.1664936748174
+      positionAbsolute:
+        x: 3549.3753363012665
+        y: 586.1664936748174
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        error_strategy: fail-branch
+        headers: Cache-Control:no-cache
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: false
+        timeout:
+          connect: 5
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+          read: 10
+        title: HTTP 请求查询工单
+        type: http-request
+        url: '{{#env.TICKET_API_BASE_URL#}}/api/tickets/ticketId/{{#1779528053164.ticketId#}}'
+        variables: []
+      height: 195
+      id: '1779528247384'
+      position:
+        x: 3933.811890446899
+        y: 357.3865256059626
+      positionAbsolute:
+        x: 3933.811890446899
+        y: 357.3865256059626
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: 查询工单失败，请检查网络后重试。如果问题持续，请联系管理员。
+        selected: false
+        title: 查询工单异常响应
+        type: answer
+        variables: []
+      height: 115
+      id: '1779528484061'
+      position:
+        x: 4274.811890446899
+        y: 476.1664936748175
+      positionAbsolute:
+        x: 4274.811890446899
+        y: 476.1664936748175
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "import json\n\ndef main(body: str):\n    \n    # 统一处理为字典\n    if isinstance(body,\
+          \ dict):\n        data = body\n    else:\n        try:\n            data\
+          \ = json.loads(body)\n        except:\n            data = {}\n    \n   \
+          \ # 默认值\n    status = None\n    priority = None\n    fault_description =\
+          \ None\n    location = None\n    business_success = False\n    message =\
+          \ None\n    \n    # 状态和优先级的中文映射\n    status_map = {\n        \"pending\"\
+          : \"待处理\",\n        \"processing\": \"处理中\",\n        \"completed\": \"\
+          已完成\",\n        \"cancelled\": \"已取消\"\n    }\n    priority_map = {\n  \
+          \      \"high\": \"高\",\n        \"medium\": \"中\",\n        \"low\": \"\
+          低\"\n    }\n    \n    # 解析响应\n    if 'code' in data:\n        if data.get('code')\
+          \ == 200:\n            info = data.get('data', {})\n            status =\
+          \ info.get('status')\n            priority = info.get('priority')\n    \
+          \        fault_description = info.get('faultDescription')\n            location\
+          \ = info.get('location')\n            business_success = True\n        \
+          \    message = \"查询成功\"\n        else:\n            message = data.get('message',\
+          \ '查询失败，请稍后重试')\n    else:\n        if 'status' in data:\n            status\
+          \ = data.get('status')\n            priority = data.get('priority')\n  \
+          \          fault_description = data.get('faultDescription')\n          \
+          \  location = data.get('location')\n            business_success = True\n\
+          \            message = \"查询成功\"\n        else:\n            message = '工单不存在或返回格式异常'\n\
+          \    \n    # 转换为中文\n    status_cn = status_map.get(status, status) if status\
+          \ else None\n    priority_cn = priority_map.get(priority, priority) if priority\
+          \ else None\n    \n    return {\n        \"status\": status,           #\
+          \ 原始英文（可能为 None）\n        \"priority\": priority,       # 原始英文\n       \
+          \ \"faultDescription\": fault_description,\n        \"location\": location,\n\
+          \        \"message\": message,\n        \"businessSuccess\": business_success,\n\
+          \        \"status_cn\": status_cn,     # 中文状态\n        \"priority_cn\":\
+          \ priority_cn  # 中文优先级\n    }"
+        code_language: python3
+        outputs:
+          businessSuccess:
+            children: null
+            type: boolean
+          faultDescription:
+            children: null
+            type: string
+          location:
+            children: null
+            type: string
+          message:
+            children: null
+            type: string
+          priority:
+            children: null
+            type: string
+          priority_cn:
+            children: null
+            type: string
+          status:
+            children: null
+            type: string
+          status_cn:
+            children: null
+            type: string
+        selected: false
+        title: 解析工单查询结果
+        type: code
+        variables:
+        - value_selector:
+          - '1779528247384'
+          - body
+          value_type: string
+          variable: body
+      height: 51
+      id: '1779528826995'
+      position:
+        x: 4274.811890446899
+        y: 341.3375117029459
+      positionAbsolute:
+        x: 4274.811890446899
+        y: 341.3375117029459
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: 7e18d63b-24db-4e7e-98f7-cf7facfc0816
+            value: true
+            varType: boolean
+            variable_selector:
+            - '1779528826995'
+            - businessSuccess
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: 查询工单结果判断
+        type: if-else
+      height: 147
+      id: '1779529010207'
+      position:
+        x: 4624.314820575232
+        y: 332.2432123038835
+      positionAbsolute:
+        x: 4624.314820575232
+        y: 332.2432123038835
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: '✅ 已为您查询工单。
+
+          工单号：{{#1779528053164.ticketId#}}
+
+          故障描述：{{#1779528826995.faultDescription#}}
+
+          位置：{{#1779528826995.location#}}
+
+          优先级：{{#1779528826995.priority_cn#}}
+
+          状态：{{#1779528826995.status_cn#}}'
+        selected: false
+        title: 响应工单信息
+        type: answer
+        variables: []
+      height: 210
+      id: '1779529037415'
+      position:
+        x: 4964.723451304501
+        y: 207.7944602867282
+      positionAbsolute:
+        x: 4964.723451304501
+        y: 207.7944602867282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: 找不到对应的工单信息！请确认工单号是否准确！
+        selected: false
+        title: 没有对应的工单信息响应
+        type: answer
+        variables: []
+      height: 115
+      id: '1779529189938'
+      position:
+        x: 4973.817750703564
+        y: 518.1664936748174
+      positionAbsolute:
+        x: 4973.817750703564
+        y: 518.1664936748174
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        dataset_ids:
+        - RInyyHTrat1MWyj9ofEcQNr5/sHK2k6avohPjspGfuuW5ZQB/3jnDWiK3fitmxAU
+        metadata_filtering_mode: disabled
+        multiple_retrieval_config:
+          reranking_enable: true
+          reranking_mode: reranking_model
+          reranking_model:
+            model: qwen3-rerank
+            provider: langgenius/tongyi/tongyi
+          top_k: 4
+        query_attachment_selector: []
+        query_variable_selector:
+        - '1779532175421'
+        - text
+        retrieval_mode: multiple
+        selected: false
+        title: 知识检索
+        type: knowledge-retrieval
+      height: 89
+      id: '1779529348142'
+      position:
+        x: 3549.3753363012665
+        y: 769.1773894092272
+      positionAbsolute:
+        x: 3549.3753363012665
+        y: 769.1773894092272
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: not empty
+            id: 691af475-be65-4956-bea4-1322565ab20a
+            value: ''
+            varType: array[object]
+            variable_selector:
+            - '1779529348142'
+            - result
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: 检索知识库结果判断
+        type: if-else
+      height: 123
+      id: '1779529489464'
+      position:
+        x: 3948.0189216984595
+        y: 763.8993577661357
+      positionAbsolute:
+        x: 3948.0189216984595
+        y: 763.8993577661357
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params:
+            temperature: 0.5
+            thinking: false
+          mode: chat
+          name: deepseek-v4-pro
+          provider: langgenius/deepseek/deepseek
+        prompt_template:
+        - id: 173b3867-7a5d-498d-bcce-ebf84c95f7e7
+          role: system
+          text: "你是一个查询改写专家。任务：将用户原始问题改写成适合向量检索或关键词检索的查询语句。\n\n改写规则：\n1. 去除口语化、无关语气词（如“嗯”、“那个”、“请问一下”）。\n\
+            2. 补全代词（“它”、“这个项目”、“那个方案”等）：如果对话历史中有明确指代，则替换为具体实体；否则保留原词。\n3. 转化为简洁的陈述或疑问句式，突出核心实体与关键词。不要改变原意。\n\
+            4. 保留必要的否定词（如“不”、“没有”）。\n5. 不要添加解释、回答或额外修饰。\n\n输出要求：仅一行改写后的查询语句，不要加引号、括号或其他符号。\n\
+            \n示例：\n用户输入：那个文档里有没有提到它不能退款？\n历史：用户问的是“服务协议”\n输出：服务协议里有没有提到不能退款\n\n用户输入：Q3\
+            \ 的数据\n历史：无\n输出：Q3 数据\n\n用户输入：请问一下，它的价格是多少？ \n历史：上一个问题是“iPhone 15 怎么样”\n\
+            输出：iPhone 15 价格是多少"
+        - id: d6d5dc35-ca09-4309-b342-953c382452e3
+          role: user
+          text: '{{#sys.query#}}'
+        selected: false
+        title: 查询重写
+        type: llm
+        vision:
+          enabled: false
+      height: 87
+      id: '1779532175421'
+      position:
+        x: 3172.1482701639984
+        y: 769.1773894092272
+      positionAbsolute:
+        x: 3172.1482701639984
+        y: 769.1773894092272
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1779529348142'
+          - result
+        model:
+          completion_params:
+            temperature: 0.3
+            thinking: false
+          mode: chat
+          name: deepseek-v4-pro
+          provider: langgenius/deepseek/deepseek
+        prompt_template:
+        - id: c33937f4-9508-43a9-9fbf-33db94cf42ed
+          role: system
+          text: "【最高优先级：严格忠实于检索内容】\n你的回答必须**完全且仅**基于 `{{#context#}}` 中的内容。严禁添加任何来自你自身知识的信息，包括但不限于：术语定义、常识解释、礼貌性反问（如“还需要我帮您吗？”、“请问还有其他问题吗？”）、总结性评价、或对用户问题的额外推测。\n\
+            \n如果检索到的内容本身就是一句完整的回复（例如“请提供您的工单号……”），你必须**一字不差**地输出该句子，不得增加、删减或修改任何字符（包括标点符号和空格）。确保回答完整，不要因为长度限制截断句子。\n\
+            \n禁止添加任何术语定义。例如，不要解释“响应时间”、“SLA”等概念的含义，除非检索内容中直接给出了定义。如果检索内容中只列出了数值或事实（如“响应时间4小时”），你的回答中也只能原样给出该数值或事实。\n\
+            \n对于简短的、意图明确的问题（如“查工单”、“报修”、“密码”等），你的回答必须严格等同于检索到的引导语，不得添加任何额外的问候、反问或解释。即使检索内容中本身包含示例（如工单号格式示例），也必须完整保留。\n\
+            \n【禁止输出示例】\n以下内容即使看起来无害，也严禁输出（除非检索内容中原样包含）：\n- “还需要我帮您查询其他信息吗？”\n- “请问还有其他问题吗？”\n\
+            - “您可以随时提问。”\n- “根据知识库中的信息，”（如果检索内容中本身没有这句话）\n- “这里的XX是指……”（任何定义或解释）\n\
+            - 任何形式的总结语，如“以上就是关于……的回答。”\n\n---\n\n**常规规则**（仅在不与最高优先级冲突时适用）\n\n1. **格式保留**\
+            \  \n   - 保留结果中的原始数据与逻辑。如果结果中包含列表（如步骤、要点、选项），请以友好的列表形式呈现（Markdown 无序或有序列表）。\
+            \  \n   - 如果结果包含数字、时间、名称等关键信息，请确保不遗漏。  \n   - 不要为了统一格式而丢失语义结构。\n\n2. **回答风格**\
+            \  \n   - 使用礼貌、专业的语气，但此处的“礼貌”仅限于使用检索内容中已有的措辞，不要自行添加“请”、“谢谢”等词语。\n\n3.\
+            \ **多阶段/多条件问题的完整性（仅限此类问题）**  \n   仅当用户问题明确涉及“计划”、“阶段”、“不同场景下的对比”、“多个时间点的条件”时，才需要执行以下操作：\n\
+            \   - 逐条列出每个时间点对应的所有数值、条件、判断规则。\n   - 同时包含正面成功标准和负面转向条件。\n   对于普通问题（如“如何表扬工程师？”、“硬件报修响应时间？”），不要使用该规则，只需原样输出检索到的答案。"
+        - id: a958dcb7-3973-4974-bfbe-ab28b62c472f
+          role: user
+          text: '{{#sys.query#}}'
+        selected: false
+        title: 信息整合
+        type: llm
+        vision:
+          enabled: false
+      height: 87
+      id: '1779532488891'
+      position:
+        x: 4285.367953733083
+        y: 674.1728198335791
+      positionAbsolute:
+        x: 4285.367953733083
+        y: 674.1728198335791
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: '{{#1779532488891.text#}}
+
+
+          以上信息是否解决了您的问题？
+
+          - 如果已解决，请回复“已解决”
+
+          - 如果仍需创建工单，请回复“创建工单”'
+        selected: false
+        title: 响应检索信息整合
+        type: answer
+        variables: []
+      height: 150
+      id: '1779539261519'
+      position:
+        x: 5322.724653912668
+        y: 674.1728198335791
+      positionAbsolute:
+        x: 5322.724653912668
+        y: 674.1728198335791
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params:
+            temperature: 0.3
+            thinking: false
+          mode: chat
+          name: deepseek-v4-pro
+          provider: langgenius/deepseek/deepseek
+        prompt_template:
+        - id: 64cf1b82-79ea-4f84-a2d1-e806eafb37c9
+          role: system
+          text: '判断用户问题是否属于 IT 服务台职责范围。职责范围包括：电脑硬件/软件故障、网络问题、密码重置、账号权限、VPN、邮箱配置、软件安装、IT
+            设备报修等。其他如人事、行政、财务、后勤等问题不属于 IT 范围。
+
+            只输出：IT 或 NON_IT
+
+            用户问题：{{#sys.query#}}'
+        selected: false
+        title: 识别用户咨询是否为故障修复
+        type: llm
+        vision:
+          enabled: false
+      height: 87
+      id: '1779539333753'
+      position:
+        x: 4285.367953733083
+        y: 918.9285318031395
+      positionAbsolute:
+        x: 4285.367953733083
+        y: 918.9285318031395
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: a1641816-0ce8-4ed9-b774-36bf45153121
+            value: IT
+            varType: string
+            variable_selector:
+            - '1779539333753'
+            - text
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: 是否IT故障类别
+        type: if-else
+      height: 123
+      id: '1779539459467'
+      position:
+        x: 4624.314820575232
+        y: 918.9285318031395
+      positionAbsolute:
+        x: 4624.314820575232
+        y: 918.9285318031395
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        items:
+        - input_type: constant
+          operation: set
+          value: waiting_confirm
+          variable_selector:
+          - conversation
+          - state
+        - input_type: variable
+          operation: over-write
+          value:
+          - sys
+          - query
+          variable_selector:
+          - conversation
+          - pending_fault
+        - input_type: variable
+          operation: over-write
+          value:
+          - '17796148953420'
+          - now_time
+          variable_selector:
+          - conversation
+          - state_start_time
+        selected: false
+        title: 修改状态机，保存故障问题
+        type: assigner
+        version: '2'
+      height: 135
+      id: '1779539572974'
+      position:
+        x: 5329.914240752644
+        y: 862.9797062973907
+      positionAbsolute:
+        x: 5329.914240752644
+        y: 862.9797062973907
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: 抱歉，未检索到相关信息！可咨询相关部门！
+        selected: false
+        title: 直接响应未找到相关信息
+        type: answer
+        variables: []
+      height: 115
+      id: '1779539693536'
+      position:
+        x: 4964.723451304501
+        y: 1059.4016425539603
+      positionAbsolute:
+        x: 4964.723451304501
+        y: 1059.4016425539603
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: '抱歉，未找到匹配答案。
+
+          - 如需创建工单，请回复“创建工单”
+
+          - 如暂不需要，请回复“取消”'
+        selected: false
+        title: 询问用户是否创建工单
+        type: answer
+        variables: []
+      height: 131
+      id: '1779540021910'
+      position:
+        x: 5718.981107115737
+        y: 862.9797062973907
+      positionAbsolute:
+        x: 5718.981107115737
+        y: 862.9797062973907
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: 70c5952e-2f01-4017-b258-92d7818749df
+            value: affirmative
+            varType: string
+            variable_selector:
+            - '1779519384261'
+            - text
+          id: 'true'
+          logical_operator: and
+        - case_id: 1018cbd4-e9d3-4631-aa22-4804b72aa81f
+          conditions:
+          - comparison_operator: is
+            id: 5c8c5d13-5f16-4e79-a527-9cba58efc50e
+            value: negative
+            varType: string
+            variable_selector:
+            - '1779519384261'
+            - text
+          id: 1018cbd4-e9d3-4631-aa22-4804b72aa81f
+          logical_operator: and
+        selected: false
+        title: 用户创建工单意图分支
+        type: if-else
+      height: 195
+      id: '1779540854311'
+      position:
+        x: 570.4037303548728
+        y: -406.5001868640268
+      positionAbsolute:
+        x: 570.4037303548728
+        y: -406.5001868640268
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "from datetime import datetime, timezone\n\ndef main():\n    now_iso\
+          \ = datetime.now(timezone.utc).isoformat()\n    return {\"now_time\": now_iso}"
+        code_language: python3
+        outputs:
+          now_time:
+            children: null
+            type: string
+        selected: false
+        title: 获取当前时间
+        type: code
+        variables: []
+      height: 51
+      id: '1779541050282'
+      position:
+        x: 1010.8499679256613
+        y: -597.147331095729
+      positionAbsolute:
+        x: 1010.8499679256613
+        y: -597.147331095729
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - '1779541050282'
+          - now_time
+          variable_selector:
+          - conversation
+          - state_start_time
+        - input_type: constant
+          operation: set
+          value: waiting_location
+          variable_selector:
+          - conversation
+          - state
+        selected: false
+        title: 保存当前时间
+        type: assigner
+        version: '2'
+      height: 109
+      id: '1779541119131'
+      position:
+        x: 1319.5525712156673
+        y: -597.147331095729
+      positionAbsolute:
+        x: 1319.5525712156673
+        y: -597.147331095729
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: 请提供您的工位位置或编号（例如‘A-12’、‘门口左边第二排’、‘茶水间旁边B001’），以便工程师快速找到您。
+        selected: false
+        title: 询问工位位置
+        type: answer
+        variables: []
+      height: 131
+      id: '1779541180245'
+      position:
+        x: 1682.4187284455902
+        y: -597.147331095729
+      positionAbsolute:
+        x: 1682.4187284455902
+        y: -597.147331095729
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        items:
+        - input_type: constant
+          operation: set
+          value: idle
+          variable_selector:
+          - conversation
+          - state
+        - input_type: variable
+          operation: clear
+          value: []
+          variable_selector:
+          - conversation
+          - pending_fault
+        - input_type: variable
+          operation: clear
+          value: []
+          variable_selector:
+          - conversation
+          - state_start_time
+        selected: false
+        title: 重置状态机为idle
+        type: assigner
+        version: '2'
+      height: 135
+      id: '1779541228838'
+      position:
+        x: 1327.669528083301
+        y: -308.03952122571116
+      positionAbsolute:
+        x: 1327.669528083301
+        y: -308.03952122571116
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: 好的，如有其他问题随时咨询。
+        selected: false
+        title: 友好响应用户
+        type: answer
+        variables: []
+      height: 99
+      id: '1779541253822'
+      position:
+        x: 1704.7829040348252
+        y: -308.03952122571116
+      positionAbsolute:
+        x: 1704.7829040348252
+        y: -308.03952122571116
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "import json\nimport re\nimport time\n\ndef main(llm_output: str, pending_fault:\
+          \ str = \"\"):\n    # 1. 清理前缀和转义\n    if isinstance(llm_output, str):\n\
+          \        if 'llm_output :' in llm_output:\n            llm_output = llm_output.split('llm_output\
+          \ :', 1)[-1].strip()\n        if llm_output.startswith('\"') and llm_output.endswith('\"\
+          '):\n            llm_output = llm_output[1:-1]\n        llm_output = llm_output.replace('\\\
+          \\\"', '\"')\n    \n    # 2. 提取 JSON 部分\n    match = re.search(r'\\{.*\\\
+          }', llm_output, re.DOTALL)\n    if match:\n        json_str = match.group(0)\n\
+          \    else:\n        json_str = llm_output\n    \n    # 3. 解析 JSON\n    location\
+          \ = None\n    negative = None\n    try:\n        data = json.loads(json_str)\n\
+          \        # 提取 location\n        raw_location = data.get('location')\n  \
+          \      if raw_location and isinstance(raw_location, str):\n            location\
+          \ = raw_location.strip()\n        # 提取 negative (可能是 \"no\" 或 null)\n  \
+          \      raw_negative = data.get('negative')\n        if raw_negative == \"\
+          no\":\n            negative = \"no\"\n        # 注意：如果 negative 是 null 或其他值，保持为\
+          \ None\n    except Exception as e:\n        # 解析失败，保持 location 和 negative\
+          \ 为 None\n        pass\n    \n    # 4. 根据 location 生成临时设备 ID\n    if location:\n\
+          \        temp_id = f\"TEMP-{int(time.time())}\"\n    else:\n        temp_id\
+          \ = \"UNKNOWN-DEVICE\"\n    \n    # 5. 判断用户是否放弃（negative == \"no\"）\n  \
+          \  aborted = (not location) and (negative == \"no\")\n    \n    # 6. 返回结果\n\
+          \    return {\n        \"location\": location,\n        \"faultDescription\"\
+          : pending_fault,\n        \"priority\": \"medium\",\n        \"tempDeviceId\"\
+          : temp_id,\n        \"aborted\": aborted   # 新增标志位，上游分支可据此判断用户取消位置提供\n \
+          \   }"
+        code_language: python3
+        outputs:
+          aborted:
+            children: null
+            type: boolean
+          faultDescription:
+            children: null
+            type: string
+          location:
+            children: null
+            type: string
+          priority:
+            children: null
+            type: string
+          tempDeviceId:
+            children: null
+            type: string
+        selected: false
+        title: 解析提取LLM信息
+        type: code
+        variables:
+        - value_selector:
+          - '1779519393653'
+          - text
+          value_type: string
+          variable: llm_output
+        - value_selector:
+          - conversation
+          - pending_fault
+          value_type: string
+          variable: pending_fault
+      height: 51
+      id: '1779541542812'
+      position:
+        x: 550.4037303548728
+        y: 46.22330337977678
+      positionAbsolute:
+        x: 550.4037303548728
+        y: 46.22330337977678
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: not empty
+            id: 379c384c-43a0-4615-9019-90b10f7b4973
+            value: ''
+            varType: string
+            variable_selector:
+            - '1779541542812'
+            - location
+          id: 'true'
+          logical_operator: and
+        - case_id: 6233904c-82b5-4e5e-af62-0ebefba04d1f
+          conditions:
+          - comparison_operator: is
+            id: 80e7437a-e64c-4200-9156-6c101c8bc5d2
+            value: true
+            varType: boolean
+            variable_selector:
+            - '1779541542812'
+            - aborted
+          id: 6233904c-82b5-4e5e-af62-0ebefba04d1f
+          logical_operator: and
+        selected: false
+        title: 判断提取位置信息结果
+        type: if-else
+      height: 171
+      id: '1779541623605'
+      position:
+        x: 976.8089369348843
+        y: 46.22330337977678
+      positionAbsolute:
+        x: 976.8089369348843
+        y: 46.22330337977678
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - id: key-value-425
+            key: ''
+            type: text
+            value: "{\n  \"location\": \"{{#1779541542812.location#}}\",\n  \"faultDescription\"\
+              : \"{{#1779541542812.faultDescription#}}\",\n  \"priority\": \"{{#1779541542812.priority#}}\"\
+              \n}"
+          type: json
+        error_strategy: fail-branch
+        headers: 'Content-Type:application/json
+
+          Cache-Control:no-cache'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: false
+        timeout:
+          connect: 5
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+          read: 10
+        title: 创建工单
+        type: http-request
+        url: '{{#env.TICKET_API_BASE_URL#}}/api/tickets'
+        variables: []
+      height: 176
+      id: '1779541816017'
+      position:
+        x: 1659.5672842947893
+        y: 95.74485903425324
+      positionAbsolute:
+        x: 1659.5672842947893
+        y: 95.74485903425324
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "import json\n\ndef main(body: str):\n    \n    # 如果 body 已经是字典（Coze\
+          \ 有时会自动解析 JSON），则直接使用；否则解析字符串\n    if isinstance(body, dict):\n        data\
+          \ = body\n    else:\n        try:\n            data = json.loads(body)\n\
+          \        except:\n            data = {}\n\n        # 判断是否有 code 字段（包装格式）\n\
+          \    if 'code' in data:\n        if data['code'] == 200:\n            #\
+          \ 成功，提取实际数据（可能在 data 字段内）\n            info = data.get('data', {})\n   \
+          \         ticketId = info.get('ticketId', '未知')\n            message = None\n\
+          \            businessSuccess = True\n        else:\n            # 业务失败\n\
+          \            message = data.get('message', '创建工单失败')\n            businessSuccess\
+          \ = False\n            ticketId = None\n    else:\n        businessSuccess\
+          \ = False\n        ticketId = None\n        message = data.get('message',\
+          \ '工单创建失败，请稍后重试或联系管理员！')\n    \n    return {\n        \"businessSuccess\"\
+          : businessSuccess,\n        \"ticketId\": ticketId,\n        \"message\"\
+          : message,\n\t\t\"priority_cn\": \"中\",\n\t\t\"status_cn\": \"待处理\"\n  \
+          \  }"
+        code_language: python3
+        outputs:
+          businessSuccess:
+            children: null
+            type: boolean
+          message:
+            children: null
+            type: string
+          priority_cn:
+            children: null
+            type: string
+          status_cn:
+            children: null
+            type: string
+          ticketId:
+            children: null
+            type: string
+        selected: false
+        title: 解析创建工单接口响应
+        type: code
+        variables:
+        - value_selector:
+          - '1779541816017'
+          - body
+          value_type: string
+          variable: body
+      height: 51
+      id: '1779542011461'
+      position:
+        x: 2050.4891855946116
+        y: 86.555272194277
+      positionAbsolute:
+        x: 2050.4891855946116
+        y: 86.555272194277
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: 创建工单失败，请检查网络或稍后重试。如果问题持续，请联系管理员。
+        selected: false
+        title: 创建工单异常响应
+        type: answer
+        variables: []
+      height: 115
+      id: '1779542132056'
+      position:
+        x: 2055.944285151421
+        y: 266.2875866541228
+      positionAbsolute:
+        x: 2055.944285151421
+        y: 266.2875866541228
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: 42ff3106-5563-4f36-9958-a4fb183c62dd
+            value: true
+            varType: boolean
+            variable_selector:
+            - '1779542011461'
+            - businessSuccess
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: 创建工单结果解析分支
+        type: if-else
+      height: 147
+      id: '1779542221617'
+      position:
+        x: 2359.2735658545757
+        y: 100.33965245424139
+      positionAbsolute:
+        x: 2359.2735658545757
+        y: 100.33965245424139
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        items:
+        - input_type: constant
+          operation: set
+          value: idle
+          variable_selector:
+          - conversation
+          - state
+        - input_type: variable
+          operation: clear
+          value: []
+          variable_selector:
+          - conversation
+          - pending_fault
+        - input_type: variable
+          operation: clear
+          value: []
+          variable_selector:
+          - conversation
+          - state_start_time
+        selected: false
+        title: 重置状态机为idle
+        type: assigner
+        version: '2'
+      height: 135
+      id: '1779542298931'
+      position:
+        x: 1327.669528083301
+        y: 77.36568535430067
+      positionAbsolute:
+        x: 1327.669528083301
+        y: 77.36568535430067
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: '✅ 已为您创建工单。
+
+          工单号：{{#1779542011461.ticketId#}}
+
+          故障描述：{{#1779541542812.faultDescription#}}
+
+          位置：{{#1779541542812.location#}}
+
+          优先级：{{#1779542011461.priority_cn#}}
+
+          状态：{{#1779542011461.status_cn#}}'
+        selected: false
+        title: 响应创建成功信息
+        type: answer
+        variables: []
+      height: 210
+      id: '1779542323363'
+      position:
+        x: 2771.395162198546
+        y: -10.634314645699277
+      positionAbsolute:
+        x: 2771.395162198546
+        y: -10.634314645699277
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: '{{#1779542011461.message#}}'
+        selected: false
+        title: 创建工单失败响应
+        type: answer
+        variables: []
+      height: 102
+      id: '1779542459094'
+      position:
+        x: 2788.63038490425
+        y: 299.8266360042117
+      positionAbsolute:
+        x: 2788.63038490425
+        y: 299.8266360042117
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        desc: ''
+        isInIteration: false
+        isInLoop: false
+        items:
+        - input_type: constant
+          operation: set
+          value: waiting_confirm
+          variable_selector:
+          - conversation
+          - state
+        - input_type: variable
+          operation: over-write
+          value:
+          - sys
+          - query
+          variable_selector:
+          - conversation
+          - pending_fault
+        - input_type: variable
+          operation: over-write
+          value:
+          - '17796148399810'
+          - now_time
+          variable_selector:
+          - conversation
+          - state_start_time
+        selected: false
+        title: 修改状态机，保存故障描述
+        type: assigner
+        version: '2'
+      height: 135
+      id: '17795939313650'
+      position:
+        x: 4978.418996342934
+        y: 669.5780264135909
+      positionAbsolute:
+        x: 4978.418996342934
+        y: 669.5780264135909
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        items:
+        - input_type: constant
+          operation: set
+          value: idle
+          variable_selector:
+          - conversation
+          - state
+        - input_type: variable
+          operation: clear
+          value: []
+          variable_selector:
+          - conversation
+          - pending_fault
+        - input_type: variable
+          operation: clear
+          value: []
+          variable_selector:
+          - conversation
+          - state_start_time
+        selected: false
+        title: 重置状态机
+        type: assigner
+        version: '2'
+      height: 135
+      id: '1779613464908'
+      position:
+        x: 1033.5617182132833
+        y: 532.0214386324536
+      positionAbsolute:
+        x: 1033.5617182132833
+        y: 532.0214386324536
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "from datetime import datetime, timezone\n\ndef main():\n    now_iso\
+          \ = datetime.now(timezone.utc).isoformat()\n    return {\"now_time\": now_iso}"
+        code_language: python3
+        desc: ''
+        isInIteration: false
+        isInLoop: false
+        outputs:
+          now_time:
+            children: null
+            type: string
+        selected: false
+        title: 获取当前时间 (1)
+        type: code
+        variables: []
+      height: 51
+      id: '17796148399810'
+      position:
+        x: 4629.592852218324
+        y: 674.1728198335791
+      positionAbsolute:
+        x: 4629.592852218324
+        y: 674.1728198335791
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "from datetime import datetime, timezone\n\ndef main():\n    now_iso\
+          \ = datetime.now(timezone.utc).isoformat()\n    return {\"now_time\": now_iso}"
+        code_language: python3
+        desc: ''
+        isInIteration: false
+        isInLoop: false
+        outputs:
+          now_time:
+            children: null
+            type: string
+        selected: false
+        title: 获取当前时间 (2)
+        type: code
+        variables: []
+      height: 51
+      id: '17796148953420'
+      position:
+        x: 4978.418996342934
+        y: 871.6025793686483
+      positionAbsolute:
+        x: 4978.418996342934
+        y: 871.6025793686483
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    viewport:
+      x: -613.1117256522516
+      y: 521.6027698566359
+      zoom: 0.5000000000000002
+  rag_pipeline_variables: []
