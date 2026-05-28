@@ -122,7 +122,7 @@ IT 工单助手是一个企业级全栈应用，结合低代码 AI 编排平台 
    | 工单 API | http://你的服务器IP:8080/api/... |
    | Dify 工单助手 WebApp | 从 Dify 控制台获取的地址 |
 
-📊 Actuator 监控端点说明
+## 📊 Actuator 监控端点说明
 启用 Actuator 后，可通过 /manage 前缀访问（已配置 management.endpoints.web.base-path=/manage）：
 
 | 端点 | 说明 | 示例 |
