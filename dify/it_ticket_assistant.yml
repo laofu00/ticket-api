@@ -907,15 +907,16 @@ workflow:
         prompt_template:
         - id: 1e6fdde7-fae5-476d-a992-25c6eb542650
           role: system
-          text: '判断用户输入属于以下哪一类，只输出一个单词：
+          text: '判断用户输入是否是对“是否创建工单”问题的肯定回答。
 
-            - affirmative：用户同意创建工单，包含“是”、“可以”、“创建”、“好的”、“报修”、“帮我提”、“提交工单”、“创建工单”、“需要”、“麻烦处理”
+            - affirmative：用户明确同意，如“创建”、“报修”、“帮我提”、“提交工单”、“需要”。
 
-            - negative：用户拒绝创建工单，包含“否”、“不用”、“算了”、“取消”、“不需要”、“已解决”、“暂不需要”、“好了”、“解决了”
+            - negative：用户明确拒绝，如“否”、“不用”、“算了”、“取消”、“不需要”。
 
-            - other：跟以上无关内容
+            - other：用户陈述新的问题、闲聊、或与创建工单无关的内容。
 
-            只能输出其中任意一个单词：affirmative、negative、other'
+
+            注意：单纯陈述故障（如“VPN连不上”）不属于 affirmative。'
         - id: b5fbdc8e-7734-40ac-ae4f-88af712ac856
           role: user
           text: '{{#sys.query#}}'
@@ -1027,11 +1028,13 @@ workflow:
           role: system
           text: '你是一个意图识别专家。你的任务是根据用户输入，判断意图并严格输出以下三类单词之一：query_ticket、greeting、need_help。
 
+
             - query_ticket：用户明确询问工单状态，包含“查工单”、“工单状态”、“我的工单”、“工单号”等。
 
-            - greeting：用户问候或闲聊，如“你好”、“在吗”、“谢谢”、“今天天气”等与 IT 服务无关的内容。
+            - greeting：用户问候、闲聊，或者输入过于简短、含义模糊（如“创建”、“好”、“哦”、“嗯”、“那个”），以及任何无法明确归为 query_ticket
+            或 need_help 的内容。
 
-            - need_help：其他所有需要 IT 帮助的问题，包括报修、故障、咨询操作步骤、寻求解决方案、奖励机制等。
+            - need_help：用户明确描述故障、报修、咨询操作步骤、寻求解决方案等需要 IT 帮助的问题。
 
 
             绝对不要输出任何解释、标点符号、空格或其他多余字符。只输出一个单词。'
@@ -1411,7 +1414,7 @@ workflow:
       width: 241
     - data:
         dataset_ids:
-        - RInyyHTrat1MWyj9ofEcQNr5/sHK2k6avohPjspGfuuW5ZQB/3jnDWiK3fitmxAU
+        - VvkITSgpsmB/7Z/yTPBbP2KETHkOkozUJIGfSYB7gyUxKYY3s0rvuw66W9lB3+P1
         metadata_filtering_mode: disabled
         multiple_retrieval_config:
           reranking_enable: true
@@ -1419,7 +1422,16 @@ workflow:
           reranking_model:
             model: qwen3-rerank
             provider: langgenius/tongyi/tongyi
-          top_k: 4
+          score_threshold: 0.5
+          top_k: 5
+          weights:
+            keyword_setting:
+              keyword_weight: 0.3
+            vector_setting:
+              embedding_model_name: bge-m3
+              embedding_provider_name: langgenius/ollama/ollama
+              vector_weight: 0.7
+            weight_type: customized
         query_attachment_selector: []
         query_variable_selector:
         - '1779532175421'
@@ -1436,7 +1448,7 @@ workflow:
       positionAbsolute:
         x: 3549.3753363012665
         y: 769.1773894092272
-      selected: false
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1519,7 +1531,7 @@ workflow:
           - result
         model:
           completion_params:
-            temperature: 0.3
+            temperature: 0
             thinking: false
           mode: chat
           name: deepseek-v4-pro
@@ -1695,12 +1707,12 @@ workflow:
       type: custom
       width: 241
     - data:
-        answer: 抱歉，未检索到相关信息！可咨询相关部门！
+        answer: 抱歉，未检索到“{{#sys.query#}}”相关信息！可咨询相关部门！
         selected: false
         title: 直接响应未找到相关信息
         type: answer
         variables: []
-      height: 115
+      height: 134
       id: '1779539693536'
       position:
         x: 4964.723451304501
@@ -1714,16 +1726,14 @@ workflow:
       type: custom
       width: 241
     - data:
-        answer: '抱歉，未找到匹配答案。
+        answer: '抱歉，未找到“{{#sys.query#}}”相关信息。
 
-          - 如需创建工单，请回复“创建工单”
-
-          - 如暂不需要，请回复“取消”'
+          - 如需创建工单，请回复“创建工单”'
         selected: false
         title: 询问用户是否创建工单
         type: answer
         variables: []
-      height: 131
+      height: 134
       id: '1779540021910'
       position:
         x: 5718.981107115737
@@ -2229,7 +2239,7 @@ workflow:
       positionAbsolute:
         x: 2771.395162198546
         y: -10.634314645699277
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -2391,7 +2401,7 @@ workflow:
       type: custom
       width: 241
     viewport:
-      x: -613.1117256522516
-      y: 521.6027698566359
+      x: -1673.3364373126778
+      y: 157.26200792863142
       zoom: 0.5000000000000002
   rag_pipeline_variables: []

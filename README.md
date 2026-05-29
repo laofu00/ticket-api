@@ -110,7 +110,7 @@ IT 工单助手是一个企业级全栈应用，结合低代码 AI 编排平台 
 7. **导入 Dify 工作流**
    - 访问您的 Dify 控制台（需提前部署 Dify）。
    - 创建空白应用，选择“工作流”模式。
-   - 点击“导入 DSL”，选择仓库根目录下的 it_ticket_assistant_v1.0.yml。
+   - 点击“导入 DSL”，选择仓库根目录下的 it_ticket_assistant.yml。
    - 发布应用，并获取 WebApp URL。
    - 将该 URL 填入 docker/.env 中的 DIFY_WEBAPP_URL 变量，然后重启 API 容器。
 
