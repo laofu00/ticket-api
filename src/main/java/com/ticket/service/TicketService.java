@@ -22,6 +22,11 @@ public interface TicketService {
     void updateTicket(Integer id, TicketUpdateRequest request);
 
     /**
+     * 管理后台更新工单（仅状态和优先级）
+     */
+    void adminUpdateTicket(Integer id, String status, String priority);
+
+    /**
      * 删除工单
      */
     void deleteTicket(Integer id);

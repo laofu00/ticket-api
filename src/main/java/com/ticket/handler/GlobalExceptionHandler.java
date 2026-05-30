@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
 
@@ -51,6 +52,16 @@ public class GlobalExceptionHandler {
     public R<Void> handleBusinessException(BusinessException e) {
         log.warn("业务异常: code={}, message={}", e.getErrorCode().getCode(), e.getMessage());
         return R.error(e.getErrorCode(), e.getMessage());
+    }
+
+    /**
+     * 处理静态资源不存在异常（如 favicon.ico）
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public R<Void> handleNoResourceFoundException(NoResourceFoundException e) {
+        log.debug("静态资源不存在: {}", e.getMessage());
+        return R.error(404, "资源不存在");
     }
 
     /**

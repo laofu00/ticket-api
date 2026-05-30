@@ -611,7 +611,6 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>工单号</th>
                                 <th>状态</th>
                                 <th>优先级</th>
@@ -623,7 +622,7 @@
                             </tr>
                         </thead>
                         <tbody id="tableBody">
-                            <tr><td colspan="9" class="empty-state"><p>加载中...</p></td></tr>
+                            <tr><td colspan="8" class="empty-state"><p>加载中...</p></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -925,7 +924,7 @@
         if (endDate) params.set('createTimeEnd', endDate + 'T23:59:59');
 
         var tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '<tr><td colspan="9" class="loading-spinner"></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="loading-spinner"></td></tr>';
 
         fetch('/api/tickets?' + params.toString())
             .then(function (res) { return res.json(); })
@@ -935,7 +934,7 @@
             })
             .catch(function (err) {
                 console.error('Tickets load error:', err);
-                tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">&#x26A0;</div><p>数据加载失败</p></div></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">&#x26A0;</div><p>数据加载失败</p></div></td></tr>';
             });
     }
 
@@ -944,7 +943,7 @@
         var records = pageResult.records || [];
 
         if (records.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">&#x1F4ED;</div><p>暂无工单数据</p></div></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">&#x1F4ED;</div><p>暂无工单数据</p></div></td></tr>';
             document.getElementById('pagination').innerHTML = '';
             return;
         }
@@ -957,10 +956,8 @@
             var priorityBadge = PRIORITY_BADGE[t.priority] || 'badge-gray';
             var desc = t.faultDescription || '-';
             var createTime = t.createTime || '';
-            if (createTime.length > 16) createTime = createTime.substring(0, 16);
 
             html += '<tr>' +
-                '<td>' + t.id + '</td>' +
                 '<td><span class="text-ellipsis" style="display:inline-block;max-width:160px" title="' + escapeHtml(t.ticketId) + '">' + escapeHtml(t.ticketId) + '</span></td>' +
                 '<td><span class="badge ' + statusBadge + '">' + statusText + '</span></td>' +
                 '<td><span class="badge ' + priorityBadge + '">' + priorityText + '</span></td>' +

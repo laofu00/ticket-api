@@ -9,19 +9,6 @@ spring:
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:root}
 
-  # Redis 配置
-  data:
-    redis:
-      host: ${REDIS_HOST:redis}
-      port: ${REDIS_PORT:6379}
-      database: 0
-      timeout: 3000ms
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
-
   # Jackson 日期格式配置
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss

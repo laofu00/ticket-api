@@ -1,8 +1,6 @@
 package com.ticket.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.ticket.common.BusinessException;
-import com.ticket.common.ErrorCode;
 import com.ticket.common.R;
 import com.ticket.dto.request.AdminTicketUpdateRequest;
 import com.ticket.dto.response.DashboardResponse;
@@ -12,7 +10,6 @@ import com.ticket.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -119,30 +116,7 @@ public class AdminController {
     @PatchMapping("/tickets/{id}")
     public R<Void> updateTicket(@PathVariable Integer id,
                                 @RequestBody AdminTicketUpdateRequest request) {
-        // 检查工单是否存在
-        Ticket existing = ticketMapper.selectById(id);
-        if (existing == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND, "工单不存在，id: " + id);
-        }
-
-        boolean hasChange = false;
-        Ticket updateEntity = new Ticket();
-        updateEntity.setId(id);
-
-        if (StringUtils.hasText(request.getStatus())) {
-            updateEntity.setStatus(request.getStatus());
-            hasChange = true;
-        }
-        if (StringUtils.hasText(request.getPriority())) {
-            updateEntity.setPriority(request.getPriority());
-            hasChange = true;
-        }
-
-        if (!hasChange) {
-            return R.ok();
-        }
-
-        ticketMapper.updateById(updateEntity);
+        ticketService.adminUpdateTicket(id, request.getStatus(), request.getPriority());
         return R.ok();
     }
 }

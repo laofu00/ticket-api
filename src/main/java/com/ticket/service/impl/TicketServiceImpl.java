@@ -14,11 +14,8 @@ import com.ticket.entity.Ticket;
 import com.ticket.mapper.TicketMapper;
 import com.ticket.service.TicketService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * 工单 Service 实现
@@ -28,14 +25,6 @@ import java.util.concurrent.TimeUnit;
 public class TicketServiceImpl implements TicketService {
 
     private final TicketMapper ticketMapper;
-    private final RedisTemplate<String, Object> redisTemplate;
-
-    /** Redis 缓存 key 前缀（ID） */
-    private static final String CACHE_KEY_ID = "ticket:id:";
-    /** Redis 缓存 key 前缀（工单号） */
-    private static final String CACHE_KEY_TICKET_ID = "ticket:ticketId:";
-    /** 缓存过期时间（分钟） */
-    private static final long CACHE_EXPIRE_MINUTES = 30;
 
     @Override
     public Ticket createTicket(TicketCreateRequest request) {
@@ -54,10 +43,6 @@ public class TicketServiceImpl implements TicketService {
         ticket.setPriority(StringUtils.hasText(request.getPriority()) ? request.getPriority() : "medium");
 
         ticketMapper.insert(ticket);
-
-        // 写入缓存
-        redisTemplate.opsForValue().set(CACHE_KEY_ID + ticket.getId(), ticket, CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
-        redisTemplate.opsForValue().set(CACHE_KEY_TICKET_ID + ticket.getTicketId(), ticket, CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
 
         return ticket;
     }
@@ -92,15 +77,27 @@ public class TicketServiceImpl implements TicketService {
         ticket.setReporter(request.getReporter());
 
         ticketMapper.updateById(ticket);
+    }
 
-        // 清除旧缓存
-        clearTicketCache(existing);
-        // 写入新缓存
-        Ticket updated = ticketMapper.selectById(id);
-        if (updated != null) {
-            redisTemplate.opsForValue().set(CACHE_KEY_ID + id, updated, CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
-            redisTemplate.opsForValue().set(CACHE_KEY_TICKET_ID + updated.getTicketId(), updated, CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
+    @Override
+    public void adminUpdateTicket(Integer id, String status, String priority) {
+        // 检查工单是否存在
+        Ticket existing = ticketMapper.selectById(id);
+        if (existing == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "工单不存在，id: " + id);
         }
+
+        // 更新实体（只设置需要修改的字段）
+        Ticket updateEntity = new Ticket();
+        updateEntity.setId(id);
+        if (StringUtils.hasText(status)) {
+            updateEntity.setStatus(status);
+        }
+        if (StringUtils.hasText(priority)) {
+            updateEntity.setPriority(priority);
+        }
+
+        ticketMapper.updateById(updateEntity);
     }
 
     @Override
@@ -110,43 +107,17 @@ public class TicketServiceImpl implements TicketService {
             throw new BusinessException(ErrorCode.NOT_FOUND, "工单不存在，id: " + id);
         }
         ticketMapper.deleteById(id);
-        // 清除缓存
-        clearTicketCache(ticket);
     }
 
     @Override
     public Ticket getTicketById(Integer id) {
-        // 先查缓存
-        String cacheKey = CACHE_KEY_ID + id;
-        Ticket ticket = (Ticket) redisTemplate.opsForValue().get(cacheKey);
-        if (ticket != null) {
-            return ticket;
-        }
-
-        // 缓存未命中，查数据库
-        ticket = ticketMapper.selectById(id);
-        if (ticket != null) {
-            redisTemplate.opsForValue().set(cacheKey, ticket, CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
-        }
-        return ticket;
+        return ticketMapper.selectById(id);
     }
 
     @Override
     public Ticket getTicketByTicketId(String ticketId) {
-        // 先查缓存
-        String cacheKey = CACHE_KEY_TICKET_ID + ticketId;
-        Ticket ticket = (Ticket) redisTemplate.opsForValue().get(cacheKey);
-        if (ticket != null) {
-            return ticket;
-        }
-
-        // 缓存未命中，查数据库
-        ticket = ticketMapper.selectOne(
+        return ticketMapper.selectOne(
                 new LambdaQueryWrapper<Ticket>().eq(Ticket::getTicketId, ticketId));
-        if (ticket != null) {
-            redisTemplate.opsForValue().set(cacheKey, ticket, CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
-        }
-        return ticket;
     }
 
     @Override
@@ -173,13 +144,5 @@ public class TicketServiceImpl implements TicketService {
         pageResult.setRecords(result.getRecords());
 
         return pageResult;
-    }
-
-    /**
-     * 清除工单相关的所有缓存
-     */
-    private void clearTicketCache(Ticket ticket) {
-        redisTemplate.delete(CACHE_KEY_ID + ticket.getId());
-        redisTemplate.delete(CACHE_KEY_TICKET_ID + ticket.getTicketId());
     }
 }
