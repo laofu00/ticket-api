@@ -45,7 +45,7 @@ logging:
 
 # Dify 工单助手配置
 dify:
-  webapp-url: http://localhost/chat/ptkUTIuyodFBUixf
+  webapp-url: http://localhost/chat/LKugbTXclDpvpNj2
 
 # Actuator 监控配置
 management:
