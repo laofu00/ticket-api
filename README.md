@@ -52,14 +52,14 @@ IT 工单助手是一个企业级全栈应用，结合低代码 AI 编排平台 
 ### 工单助手对话
 ![对话](doc/image/chat.png)
 
+### 工单列表管理
+![工单列表](doc/image/ticketList.png)
+
 ### 管理后台看板
 ![后台](doc/image/dashboard.png)
 
 ### 实时监控
 ![监控](doc/image/monitor.png)
-
-### 工单列表管理
-![工单列表](doc/image/ticketList.png)
 
 > 截图保存在 `doc/image/` 目录中。
 
