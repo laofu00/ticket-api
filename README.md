@@ -50,7 +50,7 @@ IT 工单助手是一个企业级全栈应用，结合低代码 AI 编排平台 
 ## 📸 核心功能演示
 
 ### 工单助手对话
-![对话](doc/image/chat.png)
+![对话](doc/image/chat_feiShu.png)
 
 ### 工单列表管理
 ![工单列表](doc/image/ticketList.png)
